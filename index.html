@@ -1,692 +1,1104 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>定制工坊管家</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --primary: #746097; --primary-light: #AD86AE; 
-            --bg: #FBF8FB; --text: #333; --text-light: #888;
-            --card-queue: #ECD9ED; --card-mine: #EADACB; --card-done: #B5B0BA;
-            --danger: #F44336;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent;}
-        body { background: var(--bg); color: var(--text); padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
-        
-        /* 底部导航 */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: calc(60px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); background: var(--card-queue); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 15px rgba(116, 96, 151, 0.1); z-index: 100; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-light); cursor: pointer; transition: 0.2s; padding: 5px 8px; border-radius: 12px;}
-        .nav-item.active { color: var(--primary); font-weight: bold; background: rgba(255,255,255,0.5);}
-        .nav-item svg { width: 22px; height: 22px; margin-bottom: 4px; fill: currentColor; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>定制工坊管家</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --primary:#746097; --primary2:#AD86AE; --pink:#ECD9ED; --cream:#EADACB;
+  --bg:#FBF8FB; --text:#333; --text-light:#888; --gray:#B5B0BA;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"PingFang SC",sans-serif;}
+body{background:var(--bg);color:var(--text);padding-bottom:calc(78px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent;}
 
-        .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+/* ===== 底部导航（5 Tab + 红点 + 安全区）===== */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;width:100%;
+  height:calc(64px + env(safe-area-inset-bottom));
+  padding-bottom:env(safe-area-inset-bottom);
+  background:var(--pink);display:flex;justify-content:space-around;align-items:center;
+  box-shadow:0 -2px 15px rgba(116,96,151,.1);z-index:100;
+  border-top-left-radius:15px;border-top-right-radius:15px;
+}
+.nav-item{position:relative;display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--text-light);cursor:pointer;transition:.2s;padding:5px 12px;border-radius:14px;}
+.nav-item.active{color:var(--primary);font-weight:bold;background:rgba(116,96,151,.12);}
+.nav-item svg{width:22px;height:22px;margin-bottom:3px;fill:currentColor;}
+.nav-dot{position:absolute;top:2px;right:6px;width:8px;height:8px;border-radius:50%;background:#F44336;display:none;}
 
-        .page-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; padding-top: 10px; color: var(--primary); }
-        .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(116, 96, 151, 0.06); }
-        .btn { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn:active { opacity: 0.8; }
-        
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 5px; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--card-queue); border-radius: 8px; font-size: 14px; background: var(--bg); outline: none;}
+.page{display:none;padding:15px;animation:fadeIn .2s;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.page-title{font-size:20px;font-weight:bold;margin-bottom:15px;padding-top:10px;color:var(--primary);}
+.card{background:#fff;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 2px 10px rgba(116,96,151,.06);}
+.btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin-top:10px;}
+.btn:active{opacity:.8;}
+.btn-sm{padding:6px 10px;font-size:12px;width:auto;margin-top:0;border-radius:6px;display:inline-block;}
+.btn-ghost{background:#fff;color:var(--primary);border:1px solid var(--pink);}
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;font-size:13px;color:var(--text-light);margin-bottom:5px;}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:10px;border:1px solid var(--pink);border-radius:8px;font-size:14px;background:#fff;outline:none;}
+.form-group textarea{resize:vertical;min-height:70px;}
+.hint{font-size:12px;color:var(--text-light);margin-top:4px;}
 
-        /* 订单卡片 */
-        .order-card { border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 4px solid transparent; position: relative; overflow: hidden; cursor: pointer;}
-        .order-card.bg-queue { background: var(--card-queue); border-left-color: var(--primary-light); color: #333;}
-        .order-card.bg-process { background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-left-color: var(--primary); color: #fff; }
-        .order-card.bg-mine { background: var(--card-mine); border-left: 3px solid var(--primary); box-shadow: 0 4px 12px rgba(116,96,151,0.2);}
-        
-        .badge-priority { background: #FF9800; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 5px;}
-        .order-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; font-weight: bold; }
+/* ===== 排单：月份胶囊 + 容量 ===== */
+.month-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;-webkit-overflow-scrolling:touch;}
+.month-tabs::-webkit-scrollbar{display:none;}
+.month-pill{flex:0 0 auto;padding:6px 14px;border-radius:20px;background:#fff;border:1px solid var(--pink);font-size:13px;color:var(--text-light);cursor:pointer;}
+.month-pill.active{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:bold;}
+.month-block{margin-bottom:18px;}
+.month-head{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 2px 10px rgba(116,96,151,.06);}
+.month-head .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.month-head .name{font-size:15px;font-weight:bold;color:var(--primary);}
+.cap-line{font-size:12px;color:var(--text-light);display:flex;justify-content:space-between;margin-bottom:3px;}
+.cap-bg{height:6px;background:var(--pink);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.cap-fill{height:100%;background:var(--primary);transition:width .3s;}
+.cap-fill.full{background:var(--primary2);}
+.self-tip{background:var(--cream);border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px;color:#6b5b3e;}
 
-        /* 详情页与时间线 */
-        .timeline { position: relative; padding-left: 20px; margin-top: 15px; border-left: 2px solid var(--card-queue); }
-        .timeline-item { position: relative; margin-bottom: 20px; }
-        .timeline-item::before { content: ''; position: absolute; left: -27px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid var(--card-done); }
-        .timeline-item.done::before { background: var(--primary); border-color: var(--primary); }
-        .t-title { font-size: 14px; font-weight: bold; color: #aaa; }
-        .timeline-item.done .t-title { color: var(--primary); }
-        .t-date { font-size: 12px; color: #bbb; margin-top: 4px; }
+/* ===== 排单卡片（颜色规则重写）===== */
+.order-card{position:relative;border-radius:10px;padding:12px 12px 12px 14px;margin-bottom:10px;cursor:pointer;border-left:3px solid transparent;overflow:hidden;}
+.order-card.bg-blue{background:var(--pink);border-left-color:var(--primary2);color:var(--text);}
+.order-card.bg-purple{background:linear-gradient(135deg,var(--primary),var(--primary2));border-left-color:var(--primary);color:#fff;}
+.order-card.bg-purple .order-title,.order-card.bg-purple .oc-sub{color:#fff;}
+.order-card.mine{background:var(--cream)!important;border-left-color:var(--primary)!important;color:var(--text)!important;}
+.order-card.mine .order-title,.order-card.mine .oc-sub{color:var(--text)!important;}
+.order-card.done{background:#efedf1!important;border-left-color:var(--gray)!important;color:#999!important;opacity:.6;}
+.order-card.done .order-title,.order-card.done .oc-sub{color:#888!important;}
+.oc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;}
+.oc-badge{font-size:11px;padding:1px 8px;border-radius:10px;background:rgba(255,255,255,.25);}
+.oc-mine-badge{position:absolute;top:8px;right:8px;font-size:11px;background:var(--primary);color:#fff;padding:2px 8px;border-radius:10px;}
+.oc-title{font-size:15px;font-weight:bold;margin-bottom:4px;}
+.oc-sub{font-size:12px;color:var(--text-light);}
+.oc-dots{display:flex;gap:3px;margin-top:8px;align-items:center;font-size:11px;color:var(--text-light);}
+.oc-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45);}
+.oc-dot.on{background:var(--primary);}
+.order-card.bg-purple .oc-dot{background:rgba(255,255,255,.4);}
+.order-card.bg-purple .oc-dot.on{background:#fff;}
 
-        /* 聊天区 */
-        .chat-box { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-bottom: 10px; }
-        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.4; }
-        .msg-me { align-self: flex-end; background: var(--primary); color: #fff; border-bottom-right-radius: 2px; }
-        .msg-other { align-self: flex-start; background: var(--bg); border: 1px solid var(--card-queue); color: #333; border-bottom-left-radius: 2px; }
-        .chat-input-area { display: flex; gap: 10px; margin-top: 10px; }
-        .chat-input-area input { flex: 1; padding: 10px; border: 1px solid var(--card-queue); border-radius: 20px; outline: none; background: var(--bg);}
-        .chat-input-area button { padding: 0 20px; border-radius: 20px; background: var(--primary); color: #fff; border: none; font-weight: bold; }
+/* ===== 时间线 ===== */
+.timeline{position:relative;padding-left:22px;margin-top:8px;}
+.timeline::before{content:'';position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--pink);}
+.tl-item{position:relative;margin-bottom:16px;}
+.tl-item::before{content:'';position:absolute;left:-22px;top:3px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--pink);z-index:2;}
+.tl-item.done::before{background:var(--primary);border-color:var(--primary);}
+.tl-item.current::before{background:var(--primary2);border-color:var(--primary2);animation:pulse 1.4s infinite;}
+.tl-item.skip::before{background:#fff;border-color:var(--gray);}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(173,134,174,.6)}70%{box-shadow:0 0 0 8px rgba(173,134,174,0)}100%{box-shadow:0 0 0 0 rgba(173,134,174,0)}}
+.tl-name{font-size:14px;color:#888;}
+.tl-item.done .tl-name{color:var(--primary);font-weight:bold;}
+.tl-item.current .tl-name{color:var(--primary2);font-weight:bold;}
+.tl-item.skip .tl-name{text-decoration:line-through;color:#bbb;}
+.tl-desc{font-size:12px;color:#aaa;margin-top:2px;}
+.tl-meta{font-size:11px;color:var(--text-light);margin-top:2px;}
+.tl-photo{width:52px;height:52px;border-radius:6px;object-fit:cover;margin-top:6px;margin-right:6px;}
 
-        /* 抽屉 */
-        .drawer-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
-        .drawer-content { background: #fff; width: 100%; border-radius: 20px 20px 0 0; padding: 20px; animation: slideUp 0.3s; max-height: 90vh; overflow-y: auto; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+/* ===== 材料卡片化（手机）===== */
+.mat-card{background:#fff;border:1px solid var(--pink);border-radius:10px;padding:10px;margin-bottom:10px;}
+.mat-imgs{display:flex;gap:6px;margin-bottom:6px;}
+.mat-imgs img{width:64px;height:64px;border-radius:6px;object-fit:cover;border:1px solid var(--pink);}
+.mat-status{font-size:11px;padding:1px 8px;border-radius:10px;display:inline-block;}
+.st-wait{background:#f1eef4;color:#888;}
+.st-ship{background:#FCE9D4;color:#b07a2a;}
+.st-arrive{background:#E1F0E1;color:#3e7d3e;}
 
-        #toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(116, 96, 151, 0.95); color: #fff; padding: 12px 24px; border-radius: 20px; font-size: 13px; z-index: 999; display: none; text-align: center; }
-    </style>
+/* ===== 聊天 ===== */
+.chat-box{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:6px 0;}
+.bubble{max-width:78%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.45;word-break:break-word;}
+.bubble.admin{background:var(--primary);color:#fff;align-self:flex-start;border-bottom-left-radius:3px;}
+.bubble.customer{background:var(--cream);color:var(--text);align-self:flex-end;border-bottom-right-radius:3px;}
+.bubble.notice{background:var(--pink);color:var(--primary);align-self:stretch;max-width:100%;font-weight:bold;border-radius:8px;}
+.bubble img{max-width:160px;border-radius:8px;display:block;margin-top:4px;}
+.chat-input{display:flex;gap:8px;margin-top:10px;}
+.chat-input input{flex:1;padding:10px;border:1px solid var(--pink);border-radius:20px;font-size:14px;outline:none;}
+.chat-input button{flex:0 0 auto;width:auto;padding:0 16px;margin:0;border-radius:20px;}
+
+/* ===== 作品 ===== */
+.filter-bar{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:6px;}
+.filter-bar::-webkit-scrollbar{display:none;}
+.filter-pill{flex:0 0 auto;padding:5px 14px;border-radius:16px;background:#fff;border:1px solid var(--pink);font-size:13px;color:var(--text-light);cursor:pointer;}
+.filter-pill.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pf-item{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);cursor:pointer;position:relative;}
+.pf-item img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;}
+.pf-info{padding:8px 10px;}
+.pf-name{font-size:13px;color:var(--primary);font-weight:bold;}
+.pf-tag{font-size:11px;color:var(--text-light);margin-top:2px;}
+.pf-pin{position:absolute;top:6px;left:6px;background:var(--primary);color:#fff;font-size:10px;padding:1px 7px;border-radius:8px;}
+
+/* ===== 后台 tabs ===== */
+.admin-tab{display:flex;background:#fff;border-radius:10px;padding:4px;margin-bottom:15px;box-shadow:0 2px 10px rgba(116,96,151,.06);}
+.admin-tab div{flex:1;text-align:center;padding:8px;font-size:13px;border-radius:8px;color:var(--text-light);cursor:pointer;}
+.admin-tab div.active{background:var(--primary);color:#fff;font-weight:bold;}
+.admin-section{display:none;}
+.admin-section.active{display:block;}
+.dash{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:15px;}
+.dash div{background:#fff;border-radius:10px;padding:10px;text-align:center;box-shadow:0 2px 10px rgba(116,96,151,.06);}
+.dash b{display:block;font-size:18px;color:var(--primary);}
+.dash span{font-size:11px;color:var(--text-light);}
+
+/* ===== 上传 ===== */
+.upload-area{border:2px dashed var(--primary2);border-radius:8px;padding:16px;text-align:center;color:var(--primary);cursor:pointer;font-size:13px;}
+.upload-area input{display:none;}
+
+/* ===== 弹窗 ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal-content{background:#fff;width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:20px;animation:slideUp .3s;max-height:90vh;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
+.modal-header h3{color:var(--primary);font-size:18px;}
+.modal-close{font-size:20px;color:#aaa;cursor:pointer;}
+#toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(116,96,151,.95);color:#fff;padding:12px 24px;border-radius:20px;font-size:13px;z-index:999;display:none;max-width:80%;text-align:center;}
+</style>
 </head>
 <body>
 
-    <!-- 1. 成品展示 -->
-    <div id="page-portfolio" class="page active">
-        <div class="page-title">成品展示 ✨</div>
-        <div id="portfolio-container" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+<!-- ================= 成品 ================= -->
+<div id="page-portfolio" class="page active">
+  <div class="page-title">成品展示 ✨</div>
+  <div class="filter-bar" id="pf-filters"></div>
+  <div class="pf-grid" id="portfolio-container"></div>
+</div>
+
+<!-- ================= 排单 ================= -->
+<div id="page-queue" class="page">
+  <div class="page-title">排单进度 📋</div>
+  <div id="queue-self-tip"></div>
+  <div class="month-tabs" id="month-tabs"></div>
+  <div id="queue-container"></div>
+</div>
+
+<!-- ================= 申请 ================= -->
+<div id="page-apply" class="page">
+  <div class="page-title">申请定制 ✉️</div>
+  <div class="card">
+    <form id="apply-form" onsubmit="submitApply(event)">
+      <div class="form-group"><label>您的称呼 *</label><input type="text" id="app-name" required></div>
+      <div class="form-group"><label>联系方式 *</label><input type="text" id="app-contact" required placeholder="手机号 / 微信号"></div>
+      <div class="form-group"><label>想做什么 *</label><textarea id="app-desc" required placeholder="款式、用途、穿着场合…"></textarea></div>
+      <div class="form-group"><label>预算范围</label>
+        <select id="app-budget">
+          <option value="500以下">500元以下</option>
+          <option value="500-1000">500 - 1000元</option>
+          <option value="1000-2000">1000 - 2000元</option>
+          <option value="2000以上">2000元以上</option>
+          <option value="不确定">不确定，想先聊聊</option>
+        </select>
+      </div>
+      <div class="form-group"><label>期望交付时间</label>
+        <select id="app-expected" onchange="document.getElementById('app-date-wrap').style.display = this.value==='date'?'block':'none'">
+          <option value="不急">不急</option>
+          <option value="1个月内">1个月内</option>
+          <option value="date">有明确日期</option>
+        </select>
+      </div>
+      <div class="form-group" id="app-date-wrap" style="display:none;"><input type="date" id="app-date"></div>
+      <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;">
+        <label style="margin:0;">申请加急</label>
+        <input type="checkbox" id="app-priority" style="width:auto;" onchange="if(this.checked)showToast('加急位名额有限，可能产生加急费')">
+      </div>
+      <div class="form-group">
+        <label>参考图（可选，最多6张）</label>
+        <div class="upload-area" onclick="document.getElementById('app-file').click()"><div id="app-upload-text">📷 点击上传参考图</div></div>
+        <input type="file" id="app-file" accept="image/*" multiple onchange="document.getElementById('app-upload-text').innerText = '✅ 已选择 '+this.files.length+' 张图'">
+      </div>
+      <div class="form-group"><label>特殊要求</label><input type="text" id="app-special" placeholder="如：领口要小立领"></div>
+      <button type="submit" class="btn" id="submit-btn">提交申请</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= 我的订单 ================= -->
+<div id="page-my-orders" class="page">
+  <div class="page-title">我的订单 📦</div>
+  <div id="my-apply-list"></div>
+  <div id="my-order-list"></div>
+  <div id="order-detail-view" style="display:none;"></div>
+</div>
+
+<!-- ================= 我的账户 ================= -->
+<div id="page-account" class="page">
+  <div class="page-title">我的账户 👤</div>
+
+  <!-- 登录 -->
+  <div id="login-view" class="card">
+    <h3 style="text-align:center;margin-bottom:20px;color:var(--primary);">登录</h3>
+    <div class="form-group"><input type="text" id="login-phone" placeholder="手机号"></div>
+    <div class="form-group"><input type="password" id="login-pwd" placeholder="密码"></div>
+    <button class="btn" onclick="handleLogin()">登录</button>
+    <button class="btn btn-ghost" onclick="showRegister()">注册新账号</button>
+  </div>
+
+  <!-- 注册 -->
+  <div id="register-view" class="card" style="display:none;">
+    <h3 style="text-align:center;margin-bottom:20px;color:var(--primary);">注册</h3>
+    <div class="form-group"><input type="text" id="reg-phone" placeholder="手机号"></div>
+    <div class="form-group"><input type="text" id="reg-nick" placeholder="昵称"></div>
+    <div class="form-group"><input type="password" id="reg-pwd" placeholder="密码（≥6位）"></div>
+    <div class="form-group"><input type="password" id="reg-pwd2" placeholder="再次输入密码"></div>
+    <div class="form-group"><label>密保问题</label>
+      <select id="reg-question">
+        <option value="你的生日？">你的生日？</option>
+        <option value="你的小学名称？">你的小学名称？</option>
+        <option value="你的第一只宠物名字？">你的第一只宠物名字？</option>
+      </select>
+    </div>
+    <div class="form-group"><input type="text" id="reg-answer" placeholder="密保答案"></div>
+    <button class="btn" onclick="handleRegister()">注册</button>
+    <button class="btn btn-ghost" onclick="showLogin()">返回登录</button>
+  </div>
+
+  <!-- 已登录 -->
+  <div id="account-view" style="display:none;">
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="avatar" style="width:52px;height:52px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;">客</div>
+        <div>
+          <h3 id="account-name" style="color:var(--primary);">用户</h3>
+          <div id="account-phone" style="font-size:12px;color:var(--text-light);"></div>
+        </div>
+      </div>
+    </div>
+    <div id="admin-entry" style="display:none;">
+      <div class="card" style="background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;cursor:pointer;" onclick="switchTab('admin')">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><b>⚙️ 进入后台管理</b><div style="font-size:12px;opacity:.85;margin-top:4px;" id="admin-badge-text">待处理 0</div></div>
+          <div style="font-size:22px;">→</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <button class="btn btn-ghost" onclick="editNickname()">修改昵称</button>
+      <button class="btn btn-ghost" onclick="editPassword()">修改密码</button>
+      <button class="btn" style="background:#fff;color:#F44336;border:1px solid var(--pink);" onclick="handleLogout()">退出登录</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 店长后台 ================= -->
+<div id="page-admin" class="page">
+  <div class="page-title">店长工作台 ⚙️</div>
+  <div class="dash" id="admin-dash"></div>
+  <div class="admin-tab">
+    <div id="tab-apply" class="active" onclick="switchAdminTab('apply')">待审核</div>
+    <div id="tab-manage" onclick="switchAdminTab('manage')">排单管理</div>
+    <div id="tab-port" onclick="switchAdminTab('port')">作品</div>
+  </div>
+  <div id="admin-apply" class="admin-section active"><div id="apply-list-container">加载中...</div></div>
+  <div id="admin-manage" class="admin-section"><div id="manage-list-container">加载中...</div></div>
+  <div id="admin-port" class="admin-section">
+    <div class="card">
+      <h4 style="margin-bottom:10px;color:var(--primary);">发布新作品</h4>
+      <div class="form-group"><label>作品名称</label><input type="text" id="port-title"></div>
+      <div class="form-group"><label>分类</label>
+        <select id="port-category"><option>衬衫</option><option>连衣裙</option><option>外套</option><option>其他</option></select>
+      </div>
+      <div class="form-group"><label>标签</label><input type="text" id="port-tags" placeholder="亚麻衬衫 · 2026"></div>
+      <div class="form-group"><label>描述</label><textarea id="port-desc"></textarea></div>
+      <div class="form-group">
+        <label>封面图（3:4 竖图）</label>
+        <div class="upload-area" onclick="document.getElementById('port-file').click()"><div id="port-upload-text">📷 点击选择封面图</div></div>
+        <input type="file" id="port-file" accept="image/*" onchange="document.getElementById('port-upload-text').innerText = '✅ 已选择封面'">
+      </div>
+      <button class="btn" onclick="publishPortfolio()">发布</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 通用弹窗 ================= -->
+<div id="custom-modal" class="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-content" id="modal-body"></div>
+</div>
+
+<!-- ================= 底部导航 ================= -->
+<div class="bottom-nav">
+  <div class="nav-item active" data-tab="portfolio" onclick="switchTab('portfolio')"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>成品</div>
+  <div class="nav-item" data-tab="queue" onclick="switchTab('queue')"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>排单</div>
+  <div class="nav-item" data-tab="apply" onclick="switchTab('apply')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>申请</div>
+  <div class="nav-item" data-tab="my-orders" onclick="switchTab('my-orders')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>订单<span class="nav-dot" id="dot-orders"></span></div>
+  <div class="nav-item" data-tab="account" onclick="switchTab('account')"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>我的</div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   配置
+   ===================================================================== */
+const SUPABASE_URL = 'https://lvbxdtpjondnttzxiqxl.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_a9GY13wrjtGVroA6NPpvTA_Qv3bulQ_';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* =====================================================================
+   状态
+   ===================================================================== */
+let me = null;           // { id, phone, nickname, is_admin }
+let currentEditOrderId = null;
+
+/* =====================================================================
+   工具
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function showToast(msg){ const t=$('toast'); t.innerText=msg; t.style.display='block'; clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none',2500); }
+function maskName(name){
+  if(!name) return '匿名';
+  if(name.length<=1) return name+'**';
+  return name[0]+'**';
+}
+function fmtDate(d){
+  if(!d) return '';
+  const x = new Date(d); if(isNaN(x)) return d;
+  return `${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`;
+}
+function monthKey(date=new Date()){ return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; }
+function monthLabel(mk){ const [y,m]=mk.split('-'); return `${y}年${parseInt(m)}月`; }
+// 压缩图片后再上传，节省存储
+async function compressImage(file, maxSide=1600, quality=0.8){
+  return new Promise((resolve,reject)=>{
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width:w, height:h } = img;
+      const scale = Math.min(1, maxSide/Math.max(w,h));
+      w = Math.round(w*scale); h = Math.round(h*scale);
+      const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      cv.toBlob(b => b ? resolve(b) : reject(new Error('压缩失败')), 'image/jpeg', quality);
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+async function uploadImage(bucket, file, prefix='img'){
+  const blob = await compressImage(file);
+  const name = `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2,8)}.jpg`;
+  const { error } = await sb.storage.from(bucket).upload(name, blob, { contentType:'image/jpeg' });
+  if(error) throw error;
+  const { data } = sb.storage.from(bucket).getPublicUrl(name);
+  return data.publicUrl;
+}
+
+/* =====================================================================
+   Tab 切换
+   ===================================================================== */
+function switchTab(tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const page = $('page-'+tab); if(page) page.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-tab="${tab}"]`); if(nav) nav.classList.add('active');
+
+  if(tab==='portfolio') loadPortfolio();
+  if(tab==='queue') loadQueue();
+  if(tab==='my-orders') loadMyOrders();
+  if(tab==='account') renderAccount();
+  if(tab==='admin'){ if(!me?.is_admin){ showToast('仅店长可进入'); return switchTab('account'); } loadAdminAll(); }
+  window.scrollTo(0,0);
+}
+
+/* =====================================================================
+   登录 / 注册 / 登出
+   ===================================================================== */
+function showRegister(){ $('login-view').style.display='none'; $('register-view').style.display='block'; }
+function showLogin(){ $('register-view').style.display='none'; $('login-view').style.display='block'; }
+
+async function handleLogin(){
+  const phone = $('login-phone').value.trim();
+  const pwd   = $('login-pwd').value;
+  if(!phone || !pwd) return showToast('请输入手机号和密码');
+
+  // 用"手机号@studio.local"伪装邮箱登录
+  const email = phone + '@studio.local';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+  if(error) return showToast('登录失败：' + error.message);
+
+  await loadMe(data.user.id);
+  $('login-pwd').value='';
+  showToast('登录成功');
+  switchTab('account');
+}
+
+async function handleRegister(){
+  const phone = $('reg-phone').value.trim();
+  const nick  = $('reg-nick').value.trim();
+  const pwd   = $('reg-pwd').value;
+  const pwd2  = $('reg-pwd2').value;
+  const q     = $('reg-question').value;
+  const a     = $('reg-answer').value.trim();
+
+  if(!phone || !nick || !pwd) return showToast('请填完整');
+  if(!/^1\d{10}$/.test(phone)) return showToast('手机号格式不对');
+  if(pwd.length<6) return showToast('密码至少6位');
+  if(pwd!==pwd2) return showToast('两次密码不一致');
+  if(!a) return showToast('请填写密保答案');
+
+  const email = phone + '@studio.local';
+  const { data, error } = await sb.auth.signUp({ email, password: pwd });
+  if(error) return showToast('注册失败：' + error.message);
+  if(!data.user) return showToast('注册成功，请查收验证邮件（需在Supabase关闭邮箱验证）');
+
+  // 写入 profiles
+  const { error: pe } = await sb.from('profiles').insert([{
+    id: data.user.id, phone, nickname: nick,
+    is_admin: false, security_question: q,
+    // 注意：前端不能安全地做 hash，真实项目应走 Edge Function。
+    // 这里为了能跑通流程，先存原文（见文末提醒）
+    security_answer_hash: a
+  }]);
+  if(pe) console.warn(pe);
+
+  showToast('注册成功，已自动登录');
+  await loadMe(data.user.id);
+  switchTab('account');
+}
+
+async function handleLogout(){
+  await sb.auth.signOut();
+  me = null;
+  renderAccount();
+  switchTab('portfolio');
+}
+
+async function loadMe(uid){
+  const { data } = await sb.from('profiles').select('*').eq('id', uid).single();
+  me = data || { id: uid, nickname:'用户', phone:'', is_admin:false };
+}
+
+/* =====================================================================
+   账户页渲染
+   ===================================================================== */
+function renderAccount(){
+  const logged = !!me;
+  $('login-view').style.display = logged ? 'none' : 'block';
+  $('register-view').style.display = 'none';
+  $('account-view').style.display = logged ? 'block' : 'none';
+  if(!logged) return;
+
+  $('account-name').innerText = me.nickname || '用户';
+  $('account-phone').innerText = me.phone ? me.phone.replace(/(\d{3})\d{4}(\d{4})/,'$1****$2') : '';
+  $('avatar').innerText = (me.nickname||'客')[0];
+  $('admin-entry').style.display = me.is_admin ? 'block' : 'none';
+  if(me.is_admin) refreshAdminBadge();
+}
+
+async function refreshAdminBadge(){
+  const [{ count: c1 }, { count: c2 }] = await Promise.all([
+    sb.from('applications').select('*',{count:'exact',head:true}).eq('status','待审核'),
+    sb.from('orders').select('*',{count:'exact',head:true}).eq('remark_unread', true)
+  ]);
+  $('admin-badge-text').innerText = `待处理 ${(c1||0)+(c2||0)}`;
+}
+
+function editNickname(){
+  const n = prompt('新昵称', me.nickname);
+  if(!n) return;
+  sb.from('profiles').update({nickname:n}).eq('id', me.id).then(()=>{ me.nickname=n; renderAccount(); showToast('已修改'); });
+}
+function editPassword(){
+  const p = prompt('新密码（≥6位）');
+  if(!p || p.length<6) return showToast('密码太短');
+  sb.auth.updateUser({password:p}).then(({error})=> showToast(error?('失败：'+error.message):'已修改'));
+}
+
+/* =====================================================================
+   成品展示
+   ===================================================================== */
+let pfFilter = '全部';
+async function loadPortfolio(){
+  const { data } = await sb.from('portfolios').select('*').eq('is_hidden', false).order('is_pinned',{ascending:false}).order('sort_order',{ascending:true}).order('created_at',{ascending:false});
+  const list = data || [];
+  // 分类胶囊
+  const cats = ['全部', ...new Set(list.map(x=>x.category).filter(Boolean))];
+  $('pf-filters').innerHTML = cats.map(c=>`<div class="filter-pill ${c===pfFilter?'active':''}" onclick="pfFilter='${esc(c)}';loadPortfolio()">${esc(c)}</div>`).join('');
+  const shown = pfFilter==='全部' ? list : list.filter(x=>x.category===pfFilter);
+  const box = $('portfolio-container');
+  if(!shown.length){ box.innerHTML = `<div style="grid-column:span 2;text-align:center;color:#aaa;padding:20px;">暂无成品</div>`; return; }
+  box.innerHTML = shown.map(p=>`
+    <div class="pf-item" onclick="openPortfolio('${p.id}')">
+      ${p.is_pinned?'<div class="pf-pin">精选</div>':''}
+      <img src="${esc(p.cover_image||'')}" alt="">
+      <div class="pf-info">
+        <div class="pf-name">${esc(p.title)}</div>
+        <div class="pf-tag">${esc(p.tags||p.category||'')}</div>
+      </div>
+    </div>`).join('');
+}
+
+async function openPortfolio(id){
+  const { data:p } = await sb.from('portfolios').select('*').eq('id',id).single();
+  if(!p) return showToast('作品不存在');
+  const imgs = p.detail_images || [];
+  $('modal-body').innerHTML = `
+    <div class="modal-header"><h3>${esc(p.title)}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+    <img src="${esc(p.cover_image||'')}" style="width:100%;border-radius:12px;">
+    ${imgs.length?`<div style="display:flex;gap:6px;overflow-x:auto;margin-top:10px;">${imgs.map(u=>`<img src="${esc(u)}" style="width:120px;height:150px;object-fit:cover;border-radius:8px;">`).join('')}</div>`:''}
+    <p style="font-size:13px;color:#555;margin-top:12px;white-space:pre-wrap;">${esc(p.description||'')}</p>
+    <button class="btn" onclick="applyFromPortfolio('${esc(p.title)}','${esc(p.cover_image||'')}')">✨ 同款定制</button>
+  `;
+  $('custom-modal').classList.add('show');
+}
+function applyFromPortfolio(title, cover){
+  closeModal();
+  switchTab('apply');
+  $('app-desc').value = `想做什么：参考作品《${title}》`;
+  if(cover) $('app-desc').value += `\n[风格参考]: ${cover}`;
+}
+
+/* =====================================================================
+   排单
+   ===================================================================== */
+async function loadQueue(){
+  // 1. 拉公开视图（脱敏）
+  const { data: pub } = await sb.from('public_queue').select('*');
+  const orders = pub || [];
+
+  // 2. 拉自己的订单 id（用于标黄）
+  let myOrderIds = [];
+  if(me){
+    const { data:mine } = await sb.from('orders').select('id,order_no,status,schedule_month').eq('user_id', me.id);
+    myOrderIds = (mine||[]).map(o=>o.id);
+    // 自己订单在队列里排第几
+    const myActive = (mine||[]).filter(o=>o.status!=='已完成');
+    if(myActive.length){
+      $('queue-self-tip').innerHTML = `<div class="self-tip">你的订单 ${myActive.map(o=>'<b>'+esc(o.order_no)+'</b>').join('、')} 已在队列中，请耐心等待～</div>`;
+    } else { $('queue-self-tip').innerHTML = ''; }
+  } else { $('queue-self-tip').innerHTML = ''; }
+
+  // 3. 按月份分组
+  const cur = monthKey();
+  const groups = {};
+  orders.forEach(o=>{
+    const m = o.schedule_month || cur;
+    (groups[m] = groups[m] || []).push(o);
+  });
+  // 确保当前月存在
+  if(!groups[cur]) groups[cur] = [];
+
+  // 4. 月份胶囊
+  const months = Object.keys(groups).sort((a,b)=> a.localeCompare(b));
+  const curIdx = months.indexOf(cur);
+  $('month-tabs').innerHTML = months.map((m,i)=>{
+    const isCur = m===cur;
+    return `<div class="month-pill ${isCur?'active':''}" onclick="document.getElementById('mb-${m}').scrollIntoView({behavior:'smooth',block:'start'})">${monthLabel(m)}${isCur?' (本月)':''}</div>`;
+  }).join('');
+
+  // 5. 渲染每个月
+  let html = '';
+  for(const m of months){
+    const list = groups[m];
+    const active = list.filter(o=>o.status!=='已完成');
+    const done   = list.filter(o=>o.status==='已完成');
+    const normalCap = 10, urgentCap = 2;
+    const normalUsed = active.filter(o=>!o.is_priority).length;
+    const urgentUsed = active.filter(o=>o.is_priority).length;
+    const isFull = normalUsed>=normalCap;
+    const isCur = m===cur;
+
+    // 排序：加急在前 → sort_order → created_at
+    active.sort((a,b)=>{
+      if(a.is_priority !== b.is_priority) return a.is_priority ? -1 : 1;
+      if((a.sort_order||0) !== (b.sort_order||0)) return (a.sort_order||0)-(b.sort_order||0);
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
+
+    html += `<div class="month-block" id="mb-${m}">
+      <div class="month-head">
+        <div class="row">
+          <div class="name">${monthLabel(m)}${isCur?' (本月)':''}</div>
+          <div style="font-size:12px;color:${isFull?'#b07a2a':'#3e7d3e'}">${isFull?'已满':'未满'}</div>
+        </div>
+        <div class="cap-line"><span>订单位 ${normalUsed}/${normalCap}</span><span>加急 ${urgentUsed}/${urgentCap}</span></div>
+        <div class="cap-bg"><div class="cap-fill ${isFull?'full':''}" style="width:${Math.min(100,normalUsed/normalCap*100)}%"></div></div>
+      </div>`;
+
+    if(!active.length && !done.length){
+      html += `<div style="text-align:center;color:#bbb;padding:20px;font-size:13px;">本月暂无排单</div>`;
+    }
+
+    active.forEach(o=>{
+      const isMine = myOrderIds.includes(o.id);
+      let cls = 'bg-blue';
+      if(o.status==='制作中') cls='bg-purple';
+      if(isMine) cls='mine';
+      if(isMine && o.status==='制作中') cls='mine';
+      html += renderQueueCard(o, cls, isMine);
+    });
+
+    if(done.length){
+      html += `<div style="font-size:12px;color:#bbb;text-align:center;margin:10px 0;">— 已完成 —</div>`;
+      done.forEach(o=>{
+        const isMine = myOrderIds.includes(o.id);
+        html += renderQueueCard(o, 'done', isMine);
+      });
+    }
+
+    html += `</div>`;
+  }
+  $('queue-container').innerHTML = html;
+}
+
+function renderQueueCard(o, cls, isMine){
+  const dots = Array.from({length: 10}, (_,i)=> `<div class="oc-dot ${i<o.done_count?'on':''}"></div>`).join('');
+  const dateText = o.estimated_date
+    ? `预计 ${esc(o.estimated_date)}`
+    : (o.estimated_period ? `预计${esc(o.estimated_period)}` : '时间待定');
+  const name = isMine ? esc(o.client_name) : esc(o.client_name); // 视图已脱敏
+
+  return `<div class="order-card ${cls}" onclick="handleQueueClick('${o.id}', ${isMine})">
+    ${isMine?'<div class="oc-mine-badge">⭐ 我的</div>':''}
+    <div class="oc-head">
+      <span>${esc(o.order_no)} ${o.is_priority?'⚡加急':''}</span>
+      <span class="oc-badge">${esc(o.status)}</span>
+    </div>
+    <div class="oc-title">${name} · ${esc(o.project_name)}</div>
+    <div class="oc-sub">📅 ${dateText}</div>
+    <div class="oc-dots">${dots}<span style="margin-left:6px;">${o.done_count||0}/10 ${esc(o.current_node||'')}</span></div>
+  </div>`;
+}
+
+async function handleQueueClick(orderId, isMine){
+  if(me?.is_admin){ switchTab('admin'); setTimeout(()=>openOrderDetail(orderId,'admin'), 150); return; }
+  if(isMine){ switchTab('my-orders'); setTimeout(()=>openOrderDetail(orderId,'customer'), 150); }
+  else showToast('仅可查看自己的订单哦');
+}
+
+/* =====================================================================
+   申请
+   ===================================================================== */
+async function submitApply(e){
+  e.preventDefault();
+  if(!me){ showToast('请先登录'); switchTab('account'); return; }
+  const btn = $('submit-btn'); btn.disabled = true; btn.innerText='提交中…';
+  try{
+    // 上传参考图
+    const files = $('app-file').files;
+    const urls = [];
+    for(const f of files){ urls.push(await uploadImage('application-images', f, 'app')); }
+
+    const payload = {
+      user_id: me.id,
+      applicant_name: $('app-name').value,
+      contact: $('app-contact').value,
+      description: $('app-desc').value,
+      budget_range: $('app-budget').value,
+      expected_date: $('app-expected').value==='date' ? $('app-date').value : $('app-expected').value,
+      want_priority: $('app-priority').checked,
+      images: urls,
+      special_request: $('app-special').value,
+      status: '待审核'
+    };
+    const { error } = await sb.from('applications').insert([payload]);
+    if(error) throw error;
+
+    // 结果页
+    $('apply-form').reset();
+    $('app-upload-text').innerText = '📷 点击上传参考图';
+    $('app-date-wrap').style.display='none';
+    $('apply-form').innerHTML = `
+      <div style="text-align:center;padding:20px 0;">
+        <div style="font-size:48px;">✅</div>
+        <h3 style="color:var(--primary);margin:12px 0;">申请已提交</h3>
+        <p style="font-size:13px;color:var(--text-light);">工作室会在 1-3 天内确认，请留意「我的订单」页面</p>
+        <button class="btn" onclick="location.reload()">查看我的申请</button>
+      </div>`;
+  }catch(err){
+    showToast('提交失败：' + (err.message||err));
+    btn.disabled = false; btn.innerText='提交申请';
+  }
+}
+
+/* =====================================================================
+   我的订单
+   ===================================================================== */
+async function loadMyOrders(){
+  if(!me){ $('my-order-list').innerHTML = `<div class="card" style="text-align:center;color:#aaa;">请先登录</div>`; $('my-apply-list').innerHTML=''; return; }
+  $('my-order-list').style.display='block'; $('order-detail-view').style.display='none';
+
+  // 我的申请
+  const { data: apps } = await sb.from('applications').select('*').eq('user_id', me.id).order('created_at',{ascending:false});
+  const pending = (apps||[]).filter(a=>a.status!=='已接单');
+  $('my-apply-list').innerHTML = pending.length ? `
+    <div style="font-size:13px;color:var(--text-light);margin-bottom:8px;">我的申请</div>
+    ${pending.map(a=>`
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;">
+          <b>${esc(a.description.slice(0,20))}…</b>
+          <span style="color:${a.status==='已拒绝'?'#F44336':'var(--primary)'};font-weight:bold;">${esc(a.status)}</span>
+        </div>
+        ${a.reject_reason?`<div style="font-size:12px;color:#F44336;margin-top:6px;">原因：${esc(a.reject_reason)}</div>`:''}
+      </div>`).join('')}
+    <div style="font-size:13px;color:var(--text-light);margin:12px 0 8px;">我的订单</div>
+  ` : '';
+
+  // 我的订单
+  const { data: orders } = await sb.from('orders').select('*').eq('user_id', me.id).order('created_at',{ascending:false});
+  if(!orders || !orders.length){
+    $('my-order-list').innerHTML = `<div class="card" style="text-align:center;color:#aaa;">暂无订单</div>`; return;
+  }
+  $('my-order-list').innerHTML = orders.map(o=>`
+    <div class="card" onclick="openOrderDetail('${o.id}','customer')">
+      <div style="display:flex;justify-content:space-between;">
+        <b>${esc(o.project_name)}</b>
+        <span style="color:var(--primary);font-weight:bold;">${esc(o.status)}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-top:6px;">
+        ${esc(o.order_no)} · 更新于 ${fmtDate(o.updated_at)}
+      </div>
+    </div>`).join('');
+}
+
+/* =====================================================================
+   订单详情（顾客 + 店长共用，权限不同）
+   ===================================================================== */
+async function openOrderDetail(orderId, role){
+  $('my-order-list').style.display='none';
+  const box = $('order-detail-view');
+  box.style.display='block'; box.innerHTML='加载中…';
+
+  const [{ data:o }, { data:nodes }, { data:mats }, { data:msgs }, { data:logs }] = await Promise.all([
+    sb.from('orders').select('*').eq('id',orderId).single(),
+    sb.from('order_nodes').select('*').eq('order_id',orderId).order('node_index'),
+    sb.from('materials').select('*').eq('order_id',orderId).order('sort_order'),
+    sb.from('messages').select('*').eq('order_id',orderId).order('created_at'),
+    sb.from('remark_logs').select('*').eq('order_id',orderId).order('changed_at',{ascending:false})
+  ]);
+  if(!o){ box.innerHTML='订单不存在'; return; }
+  const isAdmin = role==='admin' || me?.is_admin;
+  const canEditRemark = o.status==='排队中' && (isAdmin || o.user_id===me?.id);
+
+  // 时间线
+  const curNode = (nodes||[]).find(n=>n.status!=='已完成' && n.status!=='已跳过');
+  const tl = (nodes||[]).map(n=>{
+    let cls = '';
+    if(n.status==='已完成') cls='done';
+    else if(n.status==='已跳过') cls='skip';
+    else if(curNode && n.id===curNode.id) cls='current';
+    const photos = (n.photos||[]).map(p=>`<img class="tl-photo" src="${esc(p.url||p)}" onclick="window.open('${esc(p.url||p)}')">`).join('');
+    return `<div class="tl-item ${cls}">
+      <div class="tl-name">${n.node_index}. ${esc(n.node_name)}${n.status==='已跳过'?'（本单无此工序）':''}</div>
+      ${n.node_desc?`<div class="tl-desc">${esc(n.node_desc)}</div>`:''}
+      ${n.done_at?`<div class="tl-meta">✓ ${fmtDate(n.done_at)}</div>`:''}
+      ${photos}
+    </div>`;
+  }).join('');
+
+  // 材料卡片
+  const matHtml = (mats||[]).map(m=>{
+    const stCls = m.status==='已到货'?'st-arrive':m.status==='运输中'?'st-ship':'st-wait';
+    return `<div class="mat-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <b>${esc(m.name)}</b><span class="mat-status ${stCls}">${esc(m.status||'待采购')}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);">${esc(m.spec||'')} ${esc(m.quantity||'')}${esc(m.unit||'')} × ¥${m.unit_price||0}</div>
+      <div class="mat-imgs">
+        ${m.shop_image?`<img src="${esc(m.shop_image)}">`:''}
+        ${m.real_image?`<img src="${esc(m.real_image)}">`:''}
+      </div>
+      ${m.arrival_date?`<div style="font-size:11px;color:#888;">到货：${esc(m.arrival_date)}</div>`:''}
+    </div>`;
+  }).join('');
+
+  // 聊天
+  const chatHtml = (msgs||[]).map(m=>{
+    const mine = (m.sender_id===me?.id);
+    if(m.is_notice) return `<div class="bubble notice">📢 ${esc(m.content)}</div>`;
+    const cls = m.sender_role==='admin' ? 'admin' : 'customer';
+    return `<div class="bubble ${cls}">${esc(m.content)}${m.image_url?`<img src="${esc(m.image_url)}">`:''}</div>`;
+  }).join('');
+
+  // 备注
+  const remarkLocked = o.status!=='排队中';
+
+  box.innerHTML = `
+    <button class="btn btn-ghost" style="margin-bottom:12px;" onclick="closeOrderDetail()">← 返回</button>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;">
+        <h3 style="color:var(--primary);">${esc(o.project_name)}</h3>
+        <span style="font-weight:bold;color:var(--primary);">${esc(o.status)}</span>
+      </div>
+      <p style="font-size:13px;color:var(--text-light);margin-top:6px;">
+        ${esc(o.order_no)} · ${esc(o.client_name)}
+      </p>
+      <p style="font-size:13px;color:var(--text-light);">
+        预估：${esc(o.estimated_date||o.estimated_period||'待定')}
+      </p>
     </div>
 
-    <!-- 2. 排单列表 -->
-    <div id="page-queue" class="page">
-        <div class="page-title">排单进度 📋</div>
-        <div class="month-slider" id="month-slider" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; margin-bottom:15px;"></div>
-        <div id="queue-container"></div>
+    <div class="card">
+      <h4 style="color:var(--primary);margin-bottom:8px;">📝 备注</h4>
+      <p style="font-size:13px;">版型：${esc(o.remark_pattern||'无')}</p>
+      <p style="font-size:13px;margin-top:4px;">面料：${esc(o.remark_fabric||'无')}</p>
+      ${remarkLocked?`<div style="font-size:12px;color:#888;margin-top:8px;">🔒 已开始制作，如需修改请在下方留言与店长沟通</div>`:''}
+      ${canEditRemark?`<button class="btn btn-sm" style="background:var(--pink);color:var(--primary);margin-top:8px;" onclick="editRemark('${o.id}')">编辑备注</button>`:''}
+      ${logs && logs.length?`<div style="font-size:11px;color:#aaa;margin-top:8px;">最近修改：${esc(logs[0].field)} ${esc(logs[0].old_value||'空')} → ${esc(logs[0].new_value||'空')} · ${fmtDate(logs[0].changed_at)}</div>`:''}
     </div>
 
-    <!-- 3. 申请订单 -->
-    <div id="page-apply" class="page">
-        <div class="page-title">申请定制 ✉️</div>
-        <div class="card">
-            <div id="apply-login-tip" style="text-align:center; padding:20px; font-size:14px; color:#888;">
-                请先去【我的】页面登录后再提交申请哦~
-            </div>
-            <form id="apply-form" onsubmit="submitApply(event)" style="display:none;">
-                <div class="form-group"><label>您的称呼 *</label><input type="text" id="app-name" required></div>
-                <div class="form-group"><label>联系方式 *</label><input type="text" id="app-contact" required></div>
-                <div class="form-group"><label>定制需求描述 *</label><textarea id="app-desc" required placeholder="款式、用途、场合..."></textarea></div>
-                <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; background:#FAF9FC; padding:10px; border-radius:8px; border:1px solid var(--card-queue);">
-                    <label style="margin:0;">是否申请加急 (⚡)</label>
-                    <input type="checkbox" id="app-priority" style="width:20px; height:20px; accent-color:var(--primary);">
-                </div>
-                <button type="submit" class="btn" id="submit-btn">提交申请</button>
-            </form>
-        </div>
+    <div class="card">
+      <h4 style="color:var(--primary);margin-bottom:8px;">🧵 定制流程</h4>
+      <div class="timeline">${tl||'等待更新'}</div>
     </div>
 
-    <!-- 4. 我的订单 (列表与详情双视图) -->
-    <div id="page-my-orders" class="page">
-        <!-- 列表视图 -->
-        <div id="my-order-list-view">
-            <div class="page-title">我的订单 📦</div>
-            <div id="my-order-list">
-                <div class="card" style="text-align:center; color:#888;">请先登录查看订单</div>
-            </div>
-        </div>
-        
-        <!-- 详情视图 -->
-        <div id="my-order-detail-view" style="display:none;">
-            <div style="display:flex; align-items:center; margin-bottom:15px;">
-                <div onclick="closeMyOrderDetail()" style="cursor:pointer; font-size:20px; font-weight:bold; color:var(--primary); margin-right:10px;">←</div>
-                <div class="page-title" style="margin:0;">订单详情 📦</div>
-            </div>
-            <div id="detail-content"></div>
-        </div>
+    <div class="card">
+      <h4 style="color:var(--primary);margin-bottom:8px;">🧵 材料清单</h4>
+      ${matHtml||'<div style="font-size:13px;color:#aaa;">暂无材料</div>'}
     </div>
 
-    <!-- 5. 我的账户 -->
-    <div id="page-account" class="page">
-        <div class="page-title">我的账户 👤</div>
-        
-        <div id="auth-view" class="card">
-            <div style="display:flex; border-bottom:1px solid #eee; margin-bottom:15px;">
-                <div id="tab-login" style="flex:1; text-align:center; padding:10px; font-weight:bold; color:var(--primary); border-bottom:2px solid var(--primary); cursor:pointer;" onclick="switchAuthTab('login')">登录</div>
-                <div id="tab-register" style="flex:1; text-align:center; padding:10px; color:#888; cursor:pointer;" onclick="switchAuthTab('register')">注册</div>
-            </div>
-            <div class="form-group"><label>手机号</label><input type="text" id="auth-phone" placeholder="请输入11位手机号"></div>
-            <div class="form-group" id="nickname-group" style="display:none;"><label>您的昵称</label><input type="text" id="auth-nickname" placeholder="怎么称呼您？"></div>
-            <div class="form-group"><label>密码</label><input type="password" id="auth-pwd" placeholder="至少6位密码"></div>
-            <button class="btn" id="auth-btn" onclick="handleAuth()">登录</button>
-        </div>
-
-        <div id="account-view" class="card" style="display:none;">
-            <div style="text-align:center; margin-bottom:20px;">
-                <div style="width:60px; height:60px; background:var(--primary); border-radius:50%; color:#fff; display:inline-flex; justify-content:center; align-items:center; font-size:24px; font-weight:bold; margin-bottom:10px;" id="avatar">客</div>
-                <h3 id="display-name" style="color:var(--primary);">顾客</h3>
-                <p style="font-size:12px; color:#888;" id="display-phone"></p>
-            </div>
-            <button class="btn" style="background:#FAF9FC; color:#F44336; border: 1px solid #ECD9ED;" onclick="handleLogout()">退出登录</button>
-        </div>
+    <div class="card">
+      <h4 style="color:var(--primary);margin-bottom:8px;">💬 沟通</h4>
+      <div class="chat-box" id="chat-box">${chatHtml||'<div style="text-align:center;color:#bbb;font-size:13px;padding:10px;">暂无消息</div>'}</div>
+      <div class="chat-input">
+        <input id="chat-input" placeholder="输入留言…">
+        <button class="btn" onclick="sendMessage('${o.id}')">发送</button>
+      </div>
+      ${isAdmin?`<button class="btn btn-ghost" style="margin-top:8px;" onclick="sendNotice('${o.id}')">📢 发通知</button>`:''}
     </div>
 
-    <!-- 6. 店长后台 -->
-    <div id="page-admin" class="page">
-        <div class="page-title">店长工作台 ⚙️</div>
-        <div style="display:flex; border-bottom:1px solid #ECD9ED; margin-bottom:15px;">
-            <div id="tab-apply" style="flex:1; text-align:center; padding:10px; font-weight:bold; color:var(--primary); border-bottom:2px solid var(--primary); cursor:pointer;" onclick="switchAdminTab('apply')">待审核</div>
-            <div id="tab-manage" style="flex:1; text-align:center; padding:10px; color:#888; cursor:pointer;" onclick="switchAdminTab('manage')">排单管理</div>
-        </div>
-        
-        <div id="admin-apply" class="admin-section">
-            <div id="apply-list-container"></div>
-        </div>
+    ${isAdmin?renderAdminOrderControls(o,nodes):''}
+  `;
 
-        <div id="admin-manage" class="admin-section" style="display:none;">
-            <div id="manage-list-container"></div>
-        </div>
+  // 滚到底
+  const cb = $('chat-box'); if(cb) cb.scrollTop = cb.scrollHeight;
+
+  // 标记已读
+  if(isAdmin) await sb.from('orders').update({admin_last_read:new Date().toISOString(), remark_unread:false}).eq('id',o.id);
+  else if(o.user_id===me?.id) await sb.from('orders').update({customer_last_read:new Date().toISOString()}).eq('id',o.id);
+}
+
+function closeOrderDetail(){
+  $('order-detail-view').style.display='none';
+  if(me?.is_admin){ loadAdminAll(); }
+  else loadMyOrders();
+}
+
+async function editRemark(orderId){
+  if(!confirm('确定要修改备注吗？修改后店长会收到提醒')) return;
+  const pattern = prompt('版型备注', '');
+  const fabric  = prompt('面料备注', '');
+  const { data:old } = await sb.from('orders').select('remark_pattern,remark_fabric').eq('id',orderId).single();
+  await sb.from('orders').update({ remark_pattern:pattern, remark_fabric:fabric, remark_unread:true }).eq('id',orderId);
+  // 记日志
+  if(old){
+    if(old.remark_pattern!==pattern) await sb.from('remark_logs').insert([{order_id:orderId,field:'pattern',old_value:old.remark_pattern,new_value:pattern}]);
+    if(old.remark_fabric!==fabric) await sb.from('remark_logs').insert([{order_id:orderId,field:'fabric',old_value:old.remark_fabric,new_value:fabric}]);
+  }
+  showToast('已保存，店长会收到提醒');
+  openOrderDetail(orderId,'customer');
+}
+
+async function sendMessage(orderId){
+  const input = $('chat-input'); const content = input.value.trim(); if(!content) return;
+  await sb.from('messages').insert([{ order_id:orderId, sender_id:me?.id, sender_role: me?.is_admin?'admin':'customer', content }]);
+  input.value='';
+  openOrderDetail(orderId, me?.is_admin?'admin':'customer');
+}
+async function sendNotice(orderId){
+  const content = prompt('通知内容'); if(!content) return;
+  await sb.from('messages').insert([{ order_id:orderId, sender_id:me?.id, sender_role:'admin', content, is_notice:true }]);
+  openOrderDetail(orderId,'admin');
+}
+
+/* =====================================================================
+   店长后台
+   ===================================================================== */
+function switchAdminTab(type){
+  document.querySelectorAll('.admin-tab div').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(el=>el.classList.remove('active'));
+  $('tab-'+type).classList.add('active');
+  $('admin-'+type).classList.add('active');
+}
+
+async function loadAdminAll(){
+  await refreshAdminBadge();
+  // 数据面板
+  const [{ count:a }, { count:m }, { count:u }] = await Promise.all([
+    sb.from('applications').select('*',{count:'exact',head:true}).eq('status','待审核'),
+    sb.from('messages').select('*',{count:'exact',head:true}),
+    sb.from('orders').select('*',{count:'exact',head:true}).eq('remark_unread',true)
+  ]);
+  $('admin-dash').innerHTML = `
+    <div><b>${a||0}</b><span>待审核</span></div>
+    <div><b>${u||0}</b><span>需求变更</span></div>
+    <div><b>${m||0}</b><span>消息总数</span></div>`;
+  loadAdminApplications();
+  loadAdminOrders();
+}
+
+async function loadAdminApplications(){
+  const { data } = await sb.from('applications').select('*').eq('status','待审核').order('created_at',{ascending:false});
+  const box = $('apply-list-container');
+  if(!data || !data.length){ box.innerHTML = '<div style="text-align:center;color:#aaa;">暂无申请</div>'; return; }
+  box.innerHTML = data.map(a=>`
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;">
+        <b>${esc(a.applicant_name)} (${esc(a.contact)})</b>
+        <span style="font-size:12px;">${fmtDate(a.created_at)}</span>
+      </div>
+      <p style="font-size:13px;color:#555;margin:8px 0;white-space:pre-wrap;">${esc(a.description)}</p>
+      <div style="font-size:12px;color:var(--text-light);">
+        预算：${esc(a.budget_range||'-')} · 期望：${esc(a.expected_date||'-')} · ${a.want_priority?'⚡加急':''}
+      </div>
+      ${(a.images||[]).length?`<div style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;">${a.images.map(u=>`<img src="${esc(u)}" style="width:64px;height:64px;object-fit:cover;border-radius:6px;">`).join('')}</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <button class="btn btn-sm" style="background:var(--primary);flex:1;" onclick="acceptApply('${a.id}')">接单</button>
+        <button class="btn btn-sm" style="background:#fff;color:#F44336;border:1px solid var(--pink);flex:1;" onclick="rejectApply('${a.id}')">不接</button>
+      </div>
+    </div>`).join('');
+}
+
+async function acceptApply(appId){
+  const { data:a } = await sb.from('applications').select('*').eq('id',appId).single();
+  if(!a) return;
+  const projectName = prompt('项目名', (a.description||'').slice(0,10)) || '新定制款';
+  const isPriority = confirm('是否加急？') || a.want_priority;
+  // 自动排月
+  const curMonth = monthKey();
+  const { data:existing } = await sb.from('orders').select('schedule_month').eq('status','排队中');
+  const counts = {};
+  (existing||[]).forEach(o=> counts[o.schedule_month] = (counts[o.schedule_month]||0)+1);
+  let targetMonth = curMonth;
+  let [y,m] = curMonth.split('-').map(Number);
+  while((counts[targetMonth]||0) >= 10){
+    m++; if(m>12){ m=1; y++; }
+    targetMonth = `${y}-${String(m).padStart(2,'0')}`;
+  }
+
+  const orderNo = '#000' + (Date.now()%10000);
+  const { data:ord, error } = await sb.from('orders').insert([{
+    order_no: orderNo, client_name:a.applicant_name, contact:a.contact,
+    user_id:a.user_id, project_name:projectName, status:'排队中',
+    is_priority:isPriority, schedule_month:targetMonth,
+    application_id:a.id
+  }]).select().single();
+  if(error){ showToast('建单失败：'+error.message); return; }
+
+  const nodeDefs = [
+    ['沟通','拆件沟通','把款式拆成领型、袖型、门襟、口袋、下摆等部件，逐个确认做法'],
+    ['沟通','版型确认','确认尺寸数据和松量廓形，出尺寸表，顾客确认'],
+    ['沟通','布料选择','提供面料小样或商家实拍，确定主料、里料和辅料'],
+    ['沟通','下单确认','确认最终报价、支付定金，面辅料下单采购'],
+    ['制作','面料预缩','布料到货后下水或蒸汽预缩，防止成衣缩水变形'],
+    ['制作','打版裁片','制作纸样并裁剪布片'],
+    ['制作','缝制拼接','主体缝纫：拼合衣片、上领、装袖等'],
+    ['制作','整烫定型','分阶段熨烫，让版型立体挺括'],
+    ['制作','细节装饰','钉扣、锁眼、刺绣、印花等收尾工艺'],
+    ['制作','质检包装','检查线头、尺寸和对称度，打包']
+  ];
+  await sb.from('order_nodes').insert(nodeDefs.map((n,i)=>({
+    order_id:ord.id, node_index:i+1, node_name:n[1], node_desc:n[2], phase:n[0], status:'待开始'
+  })));
+  await sb.from('applications').update({status:'已接单'}).eq('id',appId);
+  showToast('已接单，排入 '+monthLabel(targetMonth));
+  loadAdminAll();
+}
+
+async function rejectApply(appId){
+  const reason = prompt('拒绝原因（可选）','档期已满');
+  await sb.from('applications').update({status:'已拒绝',reject_reason:reason||''}).eq('id',appId);
+  showToast('已拒绝'); loadAdminApplications();
+}
+
+async function loadAdminOrders(){
+  const { data } = await sb.from('orders').select('*').order('created_at',{ascending:false});
+  const box = $('manage-list-container');
+  if(!data || !data.length){ box.innerHTML='<div style="text-align:center;color:#aaa;">暂无订单</div>'; return; }
+  box.innerHTML = data.map(o=>`
+    <div class="card" style="border-left:4px solid ${o.remark_unread?'#F44336':'transparent'};">
+      <div style="display:flex;justify-content:space-between;">
+        <b>${esc(o.order_no)} ${esc(o.client_name)}${o.remark_unread?' 🔴':''}</b>
+        <span style="color:var(--primary);font-size:12px;">${esc(o.status)}</span>
+      </div>
+      <div style="font-size:12px;color:#888;margin:5px 0;">
+        ${esc(o.project_name)} · ${esc(o.schedule_month||'')} ${o.is_priority?'⚡':''}
+      </div>
+      <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;">
+        <button class="btn btn-sm" style="background:var(--pink);color:var(--primary);" onclick="openOrderDetail('${o.id}','admin')">详情/编辑</button>
+        <button class="btn btn-sm" onclick="quickStatus('${o.id}','排队中')">排队</button>
+        <button class="btn btn-sm" onclick="quickStatus('${o.id}','制作中')">制作</button>
+        <button class="btn btn-sm" onclick="quickStatus('${o.id}','已完成')">完成</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderAdminOrderControls(o, nodes){
+  const nodeOpts = (nodes||[]).filter(n=>n.status==='待开始').map(n=>`<option value="${n.id}">${esc(n.node_name)}</option>`).join('');
+  return `<div class="card">
+    <h4 style="color:var(--primary);margin-bottom:8px;">⚙️ 店长操作</h4>
+    <div class="form-group"><label>预估日期</label><input type="date" id="ed-date" value="${esc(o.estimated_date||'')}"></div>
+    <div class="form-group"><label>预估旬</label>
+      <select id="ed-period">
+        <option value="">-</option>
+        <option ${o.estimated_period==='上旬'?'selected':''}>上旬</option>
+        <option ${o.estimated_period==='中旬'?'selected':''}>中旬</option>
+        <option ${o.estimated_period==='下旬'?'selected':''}>下旬</option>
+      </select>
     </div>
-
-    <!-- 店长操作抽屉 -->
-    <div id="drawer" class="drawer-overlay" onclick="if(event.target === this) closeDrawer()">
-        <div class="drawer-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
-                <h3 id="drawer-title" style="color:var(--primary);">订单管理</h3>
-                <div style="font-size:20px; color:#aaa; cursor:pointer;" onclick="closeDrawer()">✕</div>
-            </div>
-            
-            <div class="form-group"><label>项目名称</label><input type="text" id="edit-project-name"></div>
-            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center;">
-                <label style="margin:0;">加急单 (⚡)</label>
-                <input type="checkbox" id="edit-priority" style="width:20px; height:20px; accent-color:var(--primary);">
-            </div>
-            <div class="form-group">
-                <label>当前状态</label>
-                <select id="edit-status">
-                    <option value="排队中">排队中</option>
-                    <option value="制作中">制作中</option>
-                    <option value="已完成">已完成</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>预估时间</label>
-                <select id="edit-period">
-                    <option value="">未定</option>
-                    <option value="上旬">当月上旬</option>
-                    <option value="中旬">当月中旬</option>
-                    <option value="下旬">当月下旬</option>
-                </select>
-            </div>
-            <div class="form-group"><label>版型备注</label><input type="text" id="edit-remark-pattern"></div>
-            <div class="form-group"><label>面料备注</label><input type="text" id="edit-remark-fabric"></div>
-            
-            <!-- 店长勾选进度节点 -->
-            <div class="form-group" style="background:#FAF9FC; padding:10px; border-radius:8px;">
-                <label style="color:var(--primary); font-weight:bold; margin-bottom:10px;">更新制作进度</label>
-                <div id="drawer-nodes-list"></div>
-            </div>
-
-            <button class="btn" onclick="saveOrderChanges()">保存修改</button>
-        </div>
+    <div class="form-group"><label>勾选完成的节点</label>
+      <select id="ed-node"><option value="">不更新</option>${nodeOpts}</select>
     </div>
+    <button class="btn" onclick="saveAdminOrder('${o.id}')">保存</button>
+  </div>`;
+}
 
-    <!-- 底部导航栏 -->
-    <div class="bottom-nav" id="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('portfolio')"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>成品</div>
-        <div class="nav-item" onclick="switchTab('queue')"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>排单</div>
-        <div class="nav-item" onclick="switchTab('apply')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>申请</div>
-        <div class="nav-item" onclick="switchTab('my-orders')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>订单</div>
-        <div class="nav-item" onclick="switchTab('account')"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>我的</div>
-        <div class="nav-item" id="nav-admin" style="display:none; color:var(--primary);" onclick="switchTab('admin')">
-            <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>后台
-        </div>
-    </div>
+async function quickStatus(id, status){
+  await sb.from('orders').update({status, updated_at:new Date().toISOString()}).eq('id',id);
+  showToast('状态已更新'); loadAdminOrders();
+}
 
-    <div id="toast">提示信息</div>
+async function saveAdminOrder(id){
+  const date = $('ed-date').value;
+  const period = $('ed-period').value;
+  const nodeId = $('ed-node').value;
+  await sb.from('orders').update({ estimated_date:date, estimated_period:period, updated_at:new Date().toISOString() }).eq('id',id);
+  if(nodeId){
+    await sb.from('order_nodes').update({ status:'已完成', done_at:new Date().toISOString() }).eq('id',nodeId);
+    // 自动联动状态
+    const { data:o } = await sb.from('orders').select('status').eq('id',id).single();
+    const { data:done } = await sb.from('order_nodes').select('node_index').eq('id',nodeId).single();
+    if(done?.node_index===4 && o.status==='排队中') await sb.from('orders').update({status:'制作中'}).eq('id',id);
+    if(done?.node_index===10) await sb.from('orders').update({status:'已完成'}).eq('id',id);
+  }
+  showToast('已保存'); openOrderDetail(id,'admin');
+}
 
-    <script>
-        const SUPABASE_URL = 'https://lvbxdtpjondnttzxiqxl.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'sb_publishable_a9GY13wrjtGVroA6NPpvTA_Qv3bulQ_'; 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* =====================================================================
+   发布作品
+   ===================================================================== */
+async function publishPortfolio(){
+  const title = $('port-title').value.trim();
+  if(!title) return showToast('请填写作品名称');
+  const file = $('port-file').files[0];
+  let cover = '';
+  if(file) cover = await uploadImage('portfolio-images', file, 'port');
+  const { error } = await sb.from('portfolios').insert([{
+    title, category: $('port-category').value,
+    tags: $('port-tags').value, description: $('port-desc').value,
+    cover_image: cover, is_hidden:false, is_pinned:false
+  }]);
+  if(error) return showToast('发布失败：'+error.message);
+  showToast('🎉 发布成功');
+  $('port-title').value=''; $('port-desc').value=''; $('port-tags').value='';
+  $('port-upload-text').innerText='📷 点击选择封面图';
+  switchTab('portfolio');
+}
 
-        let currentUser = null;
-        let isAdmin = false;
-        let authMode = 'login';
-        let currentEditOrderId = null;
-        let currentViewOrderId = null;
-
-        const DEFAULT_NODES = ['拆件沟通','版型确认','布料选择','下单确认','面料预缩','打版裁片','缝制拼接','整烫定型','细节装饰','质检包装'];
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-            document.getElementById(`page-${tabId}`).classList.add('active');
-            
-            const navs = document.querySelectorAll('.nav-item');
-            for(let i=0; i<navs.length; i++){
-                if(navs[i].getAttribute('onclick').includes(tabId)){
-                    navs[i].classList.add('active');
-                    break;
-                }
-            }
-
-            if (tabId === 'portfolio') loadPortfolio();
-            if (tabId === 'queue') loadQueue();
-            if (tabId === 'my-orders') {
-                document.getElementById('my-order-list-view').style.display = 'block';
-                document.getElementById('my-order-detail-view').style.display = 'none';
-                loadMyOrders();
-            }
-            if (tabId === 'admin') { loadAdminApplications(); loadAdminOrders(); }
-        }
-
-        function switchAdminTab(type) {
-            document.getElementById('tab-apply').style.cssText = "flex:1; text-align:center; padding:10px; cursor:pointer; color:#888;";
-            document.getElementById('tab-manage').style.cssText = "flex:1; text-align:center; padding:10px; cursor:pointer; color:#888;";
-            document.getElementById(`tab-${type}`).style.cssText = "flex:1; text-align:center; padding:10px; font-weight:bold; color:var(--primary); border-bottom:2px solid var(--primary); cursor:pointer;";
-            document.getElementById('admin-apply').style.display = type === 'apply' ? 'block' : 'none';
-            document.getElementById('admin-manage').style.display = type === 'manage' ? 'block' : 'none';
-        }
-
-        function switchAuthTab(mode) {
-            authMode = mode;
-            document.getElementById('tab-login').style.cssText = mode === 'login' ? "flex:1; text-align:center; padding:10px; font-weight:bold; color:var(--primary); border-bottom:2px solid var(--primary); cursor:pointer;" : "flex:1; text-align:center; padding:10px; color:#888; cursor:pointer;";
-            document.getElementById('tab-register').style.cssText = mode === 'register' ? "flex:1; text-align:center; padding:10px; font-weight:bold; color:var(--primary); border-bottom:2px solid var(--primary); cursor:pointer;" : "flex:1; text-align:center; padding:10px; color:#888; cursor:pointer;";
-            document.getElementById('nickname-group').style.display = mode === 'register' ? 'block' : 'none';
-            document.getElementById('auth-btn').innerText = mode === 'login' ? '登录' : '注册';
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.display = 'block';
-            setTimeout(() => toast.style.display = 'none', 2500);
-        }
-
-        // --- 店长抽屉 ---
-        async function openDrawer(orderId) {
-            currentEditOrderId = orderId;
-            const { data: order } = await supabaseClient.from('orders').select('*').eq('id', orderId).single();
-            const { data: nodes } = await supabaseClient.from('order_nodes').select('*').eq('order_id', orderId).order('node_index');
-            
-            document.getElementById('drawer-title').innerText = `管理订单 (${order.order_no})`;
-            document.getElementById('edit-project-name').value = order.project_name || '';
-            document.getElementById('edit-priority').checked = order.is_priority || false;
-            document.getElementById('edit-status').value = order.status || '排队中';
-            document.getElementById('edit-period').value = order.estimated_period || '';
-            document.getElementById('edit-remark-pattern').value = order.remark_pattern || '';
-            document.getElementById('edit-remark-fabric').value = order.remark_fabric || '';
-
-            // 渲染节点勾选
-            let nodesHtml = '';
-            if(nodes && nodes.length > 0) {
-                nodes.forEach(n => {
-                    nodesHtml += `
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                            <input type="checkbox" class="node-checkbox" data-id="${n.id}" ${n.status === '已完成' ? 'checked' : ''} style="width:18px; height:18px; accent-color:var(--primary);">
-                            <span style="font-size:14px; color:#333;">${n.node_index}. ${n.node_name}</span>
-                        </div>
-                    `;
-                });
-            }
-            document.getElementById('drawer-nodes-list').innerHTML = nodesHtml;
-            document.getElementById('drawer').style.display = 'flex';
-        }
-
-        function closeDrawer() {
-            document.getElementById('drawer').style.display = 'none';
-            currentEditOrderId = null;
-        }
-
-        async function saveOrderChanges() {
-            if(!currentEditOrderId) return;
-            const updates = {
-                project_name: document.getElementById('edit-project-name').value,
-                is_priority: document.getElementById('edit-priority').checked,
-                status: document.getElementById('edit-status').value,
-                estimated_period: document.getElementById('edit-period').value,
-                remark_pattern: document.getElementById('edit-remark-pattern').value,
-                remark_fabric: document.getElementById('edit-remark-fabric').value
-            };
-            await supabaseClient.from('orders').update(updates).eq('id', currentEditOrderId);
-
-            // 保存节点状态
-            const checkboxes = document.querySelectorAll('.node-checkbox');
-            for(let cb of checkboxes) {
-                const nodeId = cb.getAttribute('data-id');
-                const isDone = cb.checked;
-                await supabaseClient.from('order_nodes').update({ 
-                    status: isDone ? '已完成' : '待开始',
-                    done_at: isDone ? new Date() : null
-                }).eq('id', nodeId);
-            }
-
-            showToast('保存成功');
-            closeDrawer();
-            loadAdminOrders();
-            loadQueue();
-        }
-
-        // --- 顾客订单详情页 ---
-        async function openMyOrderDetail(orderId) {
-            currentViewOrderId = orderId;
-            document.getElementById('my-order-list-view').style.display = 'none';
-            document.getElementById('my-order-detail-view').style.display = 'block';
-            const container = document.getElementById('detail-content');
-            container.innerHTML = '加载中...';
-
-            const { data: order } = await supabaseClient.from('orders').select('*').eq('id', orderId).single();
-            const { data: nodes } = await supabaseClient.from('order_nodes').select('*').eq('order_id', orderId).order('node_index');
-            const { data: msgs } = await supabaseClient.from('messages').select('*').eq('order_id', orderId).order('created_at', { ascending: true });
-
-            let nodesHtml = '';
-            if(nodes && nodes.length > 0) {
-                nodes.forEach(n => {
-                    let isDone = n.status === '已完成';
-                    nodesHtml += `
-                        <div class="timeline-item ${isDone ? 'done' : ''}">
-                            <div class="t-title">${n.node_index}. ${n.node_name}</div>
-                            <div class="t-date">${isDone && n.done_at ? new Date(n.done_at).toLocaleDateString() : '等待中...'}</div>
-                        </div>
-                    `;
-                });
-            }
-
-            container.innerHTML = `
-                <div class="card">
-                    <h3 style="color:var(--primary); margin-bottom:5px;">${order.project_name}</h3>
-                    <p style="font-size:13px; color:#666;">单号：${order.order_no} ${order.is_priority ? '⚡加急' : ''}</p>
-                    <p style="font-size:13px; color:#666; margin-top:5px;">状态：<b>${order.status}</b></p>
-                </div>
-                
-                <div class="card">
-                    <h4 style="color:var(--primary); margin-bottom:10px;">📝 我的备注</h4>
-                    <p style="font-size:13px; color:#555; margin-bottom:5px;">版型：${order.remark_pattern || '无'}</p>
-                    <p style="font-size:13px; color:#555;">面料：${order.remark_fabric || '无'}</p>
-                </div>
-
-                <div class="card">
-                    <h4 style="color:var(--primary); margin-bottom:10px;">🧵 定制流程</h4>
-                    <div class="timeline">${nodesHtml || '正在等待进度更新...'}</div>
-                </div>
-
-                <div class="card">
-                    <h4 style="color:var(--primary); margin-bottom:10px;">💬 留言沟通</h4>
-                    <div class="chat-box" id="chat-box">
-                        ${msgs && msgs.length > 0 ? msgs.map(m => `
-                            <div class="msg-bubble ${m.sender_role === 'customer' ? 'msg-me' : 'msg-other'}">
-                                ${m.content}
-                            </div>
-                        `).join('') : '<div style="text-align:center; color:#aaa; font-size:12px;">暂无留言</div>'}
-                    </div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" placeholder="输入留言...">
-                        <button onclick="sendMessage()">发送</button>
-                    </div>
-                </div>
-            `;
-
-            // 滚动到聊天底部
-            const chatBox = document.getElementById('chat-box');
-            if(chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function closeMyOrderDetail() {
-            document.getElementById('my-order-list-view').style.display = 'block';
-            document.getElementById('my-order-detail-view').style.display = 'none';
-            currentViewOrderId = null;
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const content = input.value.trim();
-            if(!content || !currentViewOrderId) return;
-            input.value = '';
-
-            await supabaseClient.from('messages').insert([{
-                order_id: currentViewOrderId,
-                sender_role: 'customer',
-                content: content
-            }]);
-            
-            // 重新加载当前详情页以显示新消息
-            openMyOrderDetail(currentViewOrderId);
-        }
-
-        // --- 数据加载 ---
-        async function handleAuth() {
-            const phone = document.getElementById('auth-phone').value.trim();
-            const pwd = document.getElementById('auth-pwd').value.trim();
-            const nickname = document.getElementById('auth-nickname').value.trim();
-            
-            if (phone.length < 5 || pwd.length < 6) { showToast('请输入正确的手机号和至少6位密码'); return; }
-            const fakeEmail = phone + '@studio.local';
-            const btn = document.getElementById('auth-btn'); btn.disabled = true;
-
-            if (authMode === 'register') {
-                if(!nickname) { showToast('请填写昵称'); btn.disabled = false; return; }
-                const { data, error } = await supabaseClient.auth.signUp({ email: fakeEmail, password: pwd });
-                if (error) { showToast('注册失败: ' + error.message); btn.disabled = false; return; }
-                if(data.user) {
-                    await supabaseClient.from('profiles').insert([{ id: data.user.id, phone: phone, nickname: nickname }]);
-                }
-                showToast('注册成功');
-                await checkUser();
-            } else {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({ email: fakeEmail, password: pwd });
-                if (error) { showToast('登录失败: 账号或密码错误'); btn.disabled = false; return; }
-                showToast('登录成功');
-                await checkUser();
-            }
-            btn.disabled = false;
-        }
-
-        async function handleLogout() {
-            await supabaseClient.auth.signOut();
-            currentUser = null; isAdmin = false;
-            updateUIForAuth();
-            switchTab('portfolio');
-            showToast('已退出');
-        }
-
-        async function checkUser() {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                currentUser = session.user;
-                const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).single();
-                if (profile) {
-                    isAdmin = profile.is_admin;
-                    document.getElementById('display-name').innerText = profile.nickname || '顾客';
-                    document.getElementById('display-phone').innerText = profile.phone;
-                    document.getElementById('avatar').innerText = (profile.nickname || '客').charAt(0);
-                    document.getElementById('app-name').value = profile.nickname || '';
-                    document.getElementById('app-contact').value = profile.phone || '';
-                }
-            } else {
-                currentUser = null; isAdmin = false;
-            }
-            updateUIForAuth();
-        }
-
-        function updateUIForAuth() {
-            if (currentUser) {
-                document.getElementById('auth-view').style.display = 'none';
-                document.getElementById('account-view').style.display = 'block';
-                document.getElementById('apply-form').style.display = 'block';
-                document.getElementById('apply-login-tip').style.display = 'none';
-                if (isAdmin) {
-                    document.getElementById('nav-admin').style.display = 'flex';
-                } else {
-                    document.getElementById('nav-admin').style.display = 'none';
-                }
-            } else {
-                document.getElementById('auth-view').style.display = 'block';
-                document.getElementById('account-view').style.display = 'none';
-                document.getElementById('apply-form').style.display = 'none';
-                document.getElementById('apply-login-tip').style.display = 'block';
-                document.getElementById('nav-admin').style.display = 'none';
-            }
-        }
-
-        async function loadPortfolio() {
-            const container = document.getElementById('portfolio-container');
-            const { data } = await supabaseClient.from('portfolios').select('*').order('created_at', { ascending: false });
-            if (!data || data.length === 0) {
-                container.innerHTML = `<div class="card" style="text-align:center; grid-column:span 2; color:#888;">暂无成品展示</div>`;
-                return;
-            }
-            container.innerHTML = data.map(item => `
-                <div class="card" style="padding:0; overflow:hidden;">
-                    <img src="${item.cover_image || 'https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?auto=format&fit=crop&q=80&w=400'}" style="width:100%; height:160px; object-fit:cover;">
-                    <div style="padding:10px;"><h4 style="font-size:14px; color:var(--primary);">${item.title}</h4></div>
-                </div>
-            `).join('');
-        }
-
-        async function loadQueue() {
-            const container = document.getElementById('queue-container');
-            const slider = document.getElementById('month-slider');
-            
-            const { data } = await supabaseClient.from('orders').select('*').neq('status', '已取消').order('created_at', { ascending: true });
-            if (!data) return;
-
-            let months = new Set();
-            let thisMonth = new Date().toISOString().slice(0, 7);
-            months.add(thisMonth);
-            data.forEach(o => { if(o.created_at) months.add(o.created_at.slice(0,7)); });
-            
-            let sliderHtml = '';
-            Array.from(months).sort().forEach(m => {
-                sliderHtml += `<div class="month-pill ${m === thisMonth ? 'active' : ''}" style="padding:8px 16px; background:${m === thisMonth ? 'var(--primary)' : '#fff'}; color:${m === thisMonth ? '#fff' : '#888'}; border-radius:20px; font-size:14px; white-space:nowrap;" onclick="loadQueueFilter('${m}')">${m.replace('-', '年')}月</div>`;
-            });
-            slider.innerHTML = sliderHtml;
-
-            renderQueueList(data.filter(o => o.created_at && o.created_at.startsWith(thisMonth)));
-        }
-
-        function loadQueueFilter(monthStr) {
-            document.querySelectorAll('.month-pill').forEach(el => {
-                el.style.background = '#fff'; el.style.color = '#888';
-                if(el.innerText.includes(monthStr.replace('-','年'))) {
-                    el.style.background = 'var(--primary)'; el.style.color = '#fff';
-                }
-            });
-            supabaseClient.from('orders').select('*').neq('status', '已取消').order('created_at', { ascending: true }).then(({data}) => {
-                renderQueueList(data.filter(o => o.created_at && o.created_at.startsWith(monthStr)));
-            });
-        }
-
-        function renderQueueList(data) {
-            const container = document.getElementById('queue-container');
-            let html = '';
-            if (data.length === 0) { html = `<div style="text-align:center; color:#aaa; padding:20px;">本月暂无排单</div>`; }
-            else {
-                data.sort((a,b) => {
-                    if(a.status === '已完成' && b.status !== '已完成') return 1;
-                    if(b.status === '已完成' && a.status !== '已完成') return -1;
-                    if(a.is_priority && !b.is_priority) return -1;
-                    if(b.is_priority && !a.is_priority) return 1;
-                    return 0;
-                });
-
-                data.forEach(order => {
-                    let isMine = currentUser && order.contact === currentUser.email.split('@')[0];
-                    let showName = order.client_name;
-                    if (!isAdmin && !isMine && showName.length > 1) showName = showName.charAt(0) + '**';
-
-                    let bg = 'bg-queue';
-                    if (order.status === '制作中') bg = 'bg-process';
-                    if (order.status === '已完成') bg = 'bg-done';
-                    if (isMine) bg = 'bg-mine';
-
-                    html += `
-                        <div class="order-card ${bg}" onclick="${isAdmin ? `openDrawer('${order.id}')` : (isMine ? `openMyOrderDetail('${order.id}')` : `showToast('只能查看自己的订单哦')`)}">
-                            ${isMine ? '<div style="position:absolute; top:0; right:0; background:var(--primary); color:#fff; font-size:10px; padding:3px 8px; border-bottom-left-radius:8px;">⭐ 我的</div>' : ''}
-                            <div class="order-header">
-                                <span>${order.order_no} ${order.is_priority ? '<span class="badge-priority">⚡加急</span>' : ''}</span>
-                                <span>${order.status}</span>
-                            </div>
-                            <div style="font-size:15px; font-weight:bold; margin-bottom:6px;">${showName} · ${order.project_name}</div>
-                            <div style="font-size:12px; color:#555;">📅 预计 ${order.estimated_period ? order.estimated_period : '未定'}</div>
-                        </div>`;
-                });
-            }
-            container.innerHTML = html;
-        }
-
-        async function loadMyOrders() {
-            const list = document.getElementById('my-order-list');
-            if (!currentUser) { list.innerHTML = `<div class="card" style="text-align:center; color:#aaa;">请先登录</div>`; return; }
-            
-            const phone = currentUser.email.split('@')[0];
-            const { data } = await supabaseClient.from('orders').select('*').eq('contact', phone);
-            if (!data || data.length === 0) { list.innerHTML = `<div class="card" style="text-align:center; color:#aaa;">暂无订单</div>`; return; }
-            list.innerHTML = data.map(order => `
-                <div class="card" style="border-left:4px solid var(--primary); cursor:pointer;" onclick="openMyOrderDetail('${order.id}')">
-                    <div style="display:flex; justify-content:space-between;"><b>${order.project_name}</b><span style="color:var(--primary); font-weight:bold;">${order.status}</span></div>
-                    <div style="font-size:12px; color:#888; margin-top:8px;">单号：${order.order_no} ${order.is_priority ? '⚡加急' : ''}</div>
-                </div>
-            `).join('');
-        }
-
-        async function submitApply(e) {
-            e.preventDefault();
-            if (!currentUser) { showToast('请先登录'); return; }
-            const btn = document.getElementById('submit-btn'); btn.disabled = true; btn.innerText = '提交中...';
-
-            await supabaseClient.from('applications').insert([{
-                user_id: currentUser.id,
-                applicant_name: document.getElementById('app-name').value,
-                contact: document.getElementById('app-contact').value,
-                description: document.getElementById('app-desc').value,
-                budget_range: '面议',
-                want_priority: document.getElementById('app-priority').checked
-            }]);
-            
-            showToast('🎉 申请已提交'); 
-            document.getElementById('apply-form').reset(); 
-            btn.disabled = false; btn.innerText = '提交申请';
-        }
-
-        async function loadAdminApplications() {
-            if (!isAdmin) return;
-            const container = document.getElementById('apply-list-container');
-            const { data } = await supabaseClient.from('applications').select('*').eq('status', '待审核');
-            if (!data || data.length === 0) { container.innerHTML = '<div style="text-align:center; color:#aaa;">暂无申请</div>'; return; }
-            
-            container.innerHTML = data.map(app => `
-                <div class="card">
-                    <b>${app.applicant_name} (${app.contact}) ${app.want_priority ? '<span style="color:#FF9800;">⚡申请加急</span>' : ''}</b>
-                    <p style="font-size:13px; color:#555; margin:10px 0;">${app.description}</p>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn" style="background:var(--primary); flex:1;" onclick="acceptApply('${app.id}', '${app.applicant_name}', '${app.contact}', '${app.user_id || ''}', ${app.want_priority})">接单</button>
-                        <button class="btn" style="background:#F44336; flex:1;" onclick="rejectApply('${app.id}')">拒绝</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function acceptApply(appId, name, contact, userId, wantPriority) {
-            await supabaseClient.from('applications').update({ status: '已接单' }).eq('id', appId);
-            const orderNo = '#' + Math.floor(1000 + Math.random() * 9000);
-            
-            const { data: newOrder } = await supabaseClient.from('orders').insert([{ 
-                order_no: orderNo, client_name: name, contact: contact, project_name: '新定制款', 
-                status: '排队中', is_priority: wantPriority, user_id: userId || null, estimated_period: '中旬'
-            }]).select().single();
-            
-            const nodes = DEFAULT_NODES.map((n, i) => ({ order_id: newOrder.id, node_index: i + 1, node_name: n, status: '待开始' }));
-            await supabaseClient.from('order_nodes').insert(nodes);
-            
-            showToast('已接单'); loadAdminApplications();
-        }
-
-        async function rejectApply(appId) {
-            await supabaseClient.from('applications').update({ status: '已拒绝' }).eq('id', appId);
-            showToast('已拒绝'); loadAdminApplications();
-        }
-
-        async function loadAdminOrders() {
-            if (!isAdmin) return;
-            const container = document.getElementById('manage-list-container');
-            const { data } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
-            if (!data || data.length === 0) { container.innerHTML = '<div style="text-align:center; color:#aaa;">暂无排单</div>'; return; }
-            
-            container.innerHTML = data.map(order => `
-                <div class="card" style="border-left:4px solid ${order.is_priority ? '#FF9800' : 'var(--primary-light)'};">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <b>${order.order_no} ${order.client_name} ${order.is_priority ? '⚡' : ''}</b>
-                        <span style="font-size:12px; color:var(--primary);">${order.status}</span>
-                    </div>
-                    <button class="btn btn-sm" style="background:var(--card-queue); color:#333; width:100%; margin-top:10px;" onclick="openDrawer('${order.id}')">编辑 / 操作 / 对话</button>
-                </div>
-            `).join('');
-        }
-
-        window.onload = async () => {
-            await checkUser();
-            loadPortfolio(); 
-            loadQueue();
-        };
-    </script>
+/* =====================================================================
+   启动
+   ===================================================================== */
+sb.auth.onAuthStateChange(async (event, session)=>{
+  if(session?.user){ await loadMe(session.user.id); }
+  else { me = null; }
+  renderAccount();
+});
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session?.user) await loadMe(session.user.id);
+  renderAccount();
+  loadPortfolio();
+  loadQueue();
+});
+</script>
 </body>
 </html>
