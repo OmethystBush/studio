@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>定制工坊管家</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #746097; --bg: #FAF9FC; --text: #333; --text-light: #888;
+            --status-blue: #ECD9ED; --status-purple: #AD86AE; --status-yellow: #EADACB;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 70px; }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: #ECD9ED; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 15px rgba(116, 96, 151, 0.1); z-index: 100; border-top-left-radius: 15px; border-top-right-radius: 15px;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-light); cursor: pointer; transition: 0.2s; padding: 5px; }
+        .nav-item.active { color: var(--primary); font-weight: bold; transform: translateY(-2px);}
+        .nav-item svg { width: 22px; height: 22px; margin-bottom: 4px; fill: currentColor; }
+
+        .page { display: none; padding: 15px; animation: fadeIn 0.2s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .page-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; padding-top: 10px; color: var(--primary); }
+        .card { background: #fff; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(116, 96, 151, 0.06); }
+        .btn { width: 100%; padding: 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn:active { opacity: 0.8; }
+        .btn-sm { padding: 6px 10px; font-size: 12px; width: auto; margin-top: 0; border-radius: 6px; }
+        
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 13px; color: var(--text-light); margin-bottom: 5px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ECD9ED; border-radius: 8px; font-size: 14px; background: var(--bg); outline: none;}
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); background: #fff;}
+
+        .portfolio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .portfolio-item { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(116, 96, 151, 0.05); }
+        .portfolio-item img { width: 100%; height: 160px; object-fit: cover; background: #ECD9ED; }
+        .portfolio-info { padding: 10px; }
+        .portfolio-info h4 { font-size: 14px; margin-bottom: 4px; color: var(--primary); }
+
+        .month-header { font-size: 15px; font-weight: bold; margin: 15px 0 10px 0; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #ECD9ED; padding-bottom: 5px; color: var(--primary);}
+        .order-card { border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 4px solid transparent; cursor: pointer; transition: transform 0.1s;}
+        .order-card:active { transform: scale(0.98); }
+        .order-card.bg-blue { background: var(--status-blue); border-left-color: #AD86AE; }
+        .order-card.bg-purple { background: var(--status-purple); border-left-color: #746097; color: #fff; }
+        .order-card.bg-purple .order-title, .order-card.bg-purple .order-detail { color: #fff; }
+        .order-card.bg-yellow { background: var(--status-yellow); border-left-color: #D4BEA5; }
+        .order-card-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        .order-title { font-size: 15px; font-weight: bold; margin-bottom: 6px; }
+        .order-detail { font-size: 12px; color: #555; margin-bottom: 3px; line-height: 1.4; }
+
+        .timeline { position: relative; padding-left: 20px; margin-top: 15px; }
+        .timeline::before { content: ''; position: absolute; left: 4px; top: 0; bottom: 0; width: 2px; background: #ECD9ED; }
+        .timeline-item { position: relative; margin-bottom: 20px; }
+        .timeline-item::before { content: ''; position: absolute; left: -20px; top: 2px; width: 10px; height: 10px; border-radius: 50%; background: #ECD9ED; border: 2px solid #fff; }
+        .timeline-item.done::before { background: var(--primary); }
+        .timeline-item.done .t-title { color: var(--primary); font-weight: bold; }
+
+        .table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        .table th, .table td { border-bottom: 1px solid #ECD9ED; padding: 8px 4px; text-align: left; }
+
+        .admin-tab { display: flex; border-bottom: 1px solid #ECD9ED; margin-bottom: 15px; }
+        .admin-tab div { flex: 1; text-align: center; padding: 10px; font-size: 14px; cursor: pointer; color: var(--text-light); }
+        .admin-tab div.active { color: var(--primary); font-weight: bold; border-bottom: 2px solid var(--primary); }
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+
+        .upload-area { border: 2px dashed #AD86AE; border-radius: 8px; padding: 20px; text-align: center; color: var(--primary); cursor: pointer; background: #fff; margin-bottom: 10px;}
+        .upload-area input { display: none; }
+
+        #toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(116, 96, 151, 0.95); color: #fff; padding: 12px 24px; border-radius: 20px; font-size: 13px; z-index: 999; display: none; text-align: center; line-height: 1.5; box-shadow: 0 4px 12px rgba(0,0,0,0.15);}
+    </style>
+</head>
+<body>
+
+    <!-- 1. 成品展示 -->
+    <div id="page-portfolio" class="page active">
+        <div class="page-title">成品展示 ✨</div>
+        <div class="portfolio-grid" id="portfolio-container"></div>
+    </div>
+
+    <!-- 2. 排单列表 -->
+    <div id="page-queue" class="page">
+        <div class="page-title">排单进度 📋</div>
+        <div id="queue-container"></div>
+    </div>
+
+    <!-- 3. 申请订单 -->
+    <div id="page-apply" class="page">
+        <div class="page-title">申请定制 ✉️</div>
+        <div class="card">
+            <form id="apply-form" onsubmit="submitApply(event)">
+                <div class="form-group"><label>您的称呼 *</label><input type="text" id="app-name" required></div>
+                <div class="form-group"><label>联系方式 *</label><input type="text" id="app-contact" required></div>
+                <div class="form-group"><label>定制需求描述 *</label><textarea id="app-desc" required></textarea></div>
+                <div class="form-group">
+                    <label>预算范围</label>
+                    <select id="app-budget">
+                        <option value="500以下">500元以下</option>
+                        <option value="500-1000">500 - 1000元</option>
+                        <option value="1000-2000">1000 - 2000元</option>
+                        <option value="2000以上">2000元以上</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn" id="submit-btn">提交申请</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. 我的订单 -->
+    <div id="page-my-orders" class="page">
+        <div class="page-title">我的订单 📦</div>
+        <div id="my-order-list"></div>
+        <div id="order-detail-view" style="display: none;"></div>
+    </div>
+
+    <!-- 5. 我的账户 -->
+    <div id="page-account" class="page">
+        <div class="page-title">我的账户 👤</div>
+        <div id="login-view" class="card">
+            <h3 style="text-align:center; margin-bottom:20px; color:var(--primary);">系统登录</h3>
+            <div class="form-group"><input type="text" id="login-user" placeholder="请输入账号"></div>
+            <div class="form-group"><input type="password" id="login-pwd" placeholder="请输入密码"></div>
+            <button class="btn" onclick="handleLogin()">登录</button>
+            <!-- 这里把提示删了！ -->
+        </div>
+        <div id="account-view" class="card" style="display:none;">
+            <h3 id="account-name" style="margin-bottom: 20px; color: var(--primary);">用户</h3>
+            <button class="btn" style="background:#FAF9FC; color:#F44336; border: 1px solid #ECD9ED;" onclick="handleLogout()">退出登录</button>
+        </div>
+    </div>
+
+    <!-- 6. 店长后台 -->
+    <div id="page-admin" class="page">
+        <div class="page-title">店长工作台 ⚙️</div>
+        <div class="admin-tab">
+            <div id="tab-apply" class="active" onclick="switchAdminTab('apply')">待审核</div>
+            <div id="tab-manage" onclick="switchAdminTab('manage')">排单管理</div>
+            <div id="tab-port" onclick="switchAdminTab('port')">发布成品</div>
+        </div>
+        
+        <div id="admin-apply" class="admin-section active">
+            <div id="apply-list-container">加载中...</div>
+        </div>
+
+        <div id="admin-manage" class="admin-section">
+            <div id="manage-list-container">加载中...</div>
+        </div>
+
+        <div id="admin-port" class="admin-section">
+            <div class="card">
+                <h4 style="margin-bottom:10px; color:var(--primary);">发布新作品</h4>
+                <div class="form-group"><label>作品名称</label><input type="text" id="port-title"></div>
+                <div class="form-group"><label>作品描述</label><textarea id="port-desc" style="height:60px;"></textarea></div>
+                <div class="form-group">
+                    <label>封面图片</label>
+                    <div class="upload-area" onclick="document.getElementById('port-file').click()">
+                        <div id="port-upload-text">📷 点击从本地选择图片</div>
+                    </div>
+                    <input type="file" id="port-file" accept="image/*" onchange="document.getElementById('port-upload-text').innerText = '✅ 已选择图片'">
+                </div>
+                <button class="btn" onclick="publishPortfolio()">发布到前台首页</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav" id="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('portfolio')"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>成品</div>
+        <div class="nav-item" onclick="switchTab('queue')"><svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>排单</div>
+        <div class="nav-item" onclick="switchTab('apply')"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>申请</div>
+        <div class="nav-item" onclick="switchTab('my-orders')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>订单</div>
+        <div class="nav-item" onclick="switchTab('account')"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>账户</div>
+        <div class="nav-item" id="nav-admin" style="display:none; color:var(--primary);" onclick="switchTab('admin')"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>后台</div>
+    </div>
+
+    <div id="toast">提示信息</div>
+
+    <script>
+        const SUPABASE_URL = 'https://lvbxdtpjondnttzxiqxl.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_a9GY13wrjtGVroA6NPpvTA_Qv3bulQ_'; 
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = localStorage.getItem('mock_user') || null;
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.getElementById(`page-${tabId}`).classList.add('active');
+            
+            const navs = document.querySelectorAll('.nav-item');
+            const tabMap = { 'portfolio': 0, 'queue': 1, 'apply': 2, 'my-orders': 3, 'account': 4, 'admin': 5 };
+            if (navs[tabMap[tabId]]) navs[tabMap[tabId]].classList.add('active');
+
+            if (tabId === 'portfolio') loadPortfolio();
+            if (tabId === 'queue') loadQueue();
+            if (tabId === 'my-orders') loadMyOrders();
+            if (tabId === 'admin') { loadAdminApplications(); loadAdminOrders(); }
+        }
+
+        function switchAdminTab(type) {
+            document.querySelectorAll('.admin-tab div').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${type}`).classList.add('active');
+            document.getElementById(`admin-${type}`).classList.add('active');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 2500);
+        }
+
+        function handleLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            const pwd = document.getElementById('login-pwd').value.trim();
+            if (!user || !pwd) { showToast('请输入账号和密码'); return; }
+
+            // 秘密武器：只有输对密码才是店长
+            if (user === 'admin' && pwd === '123456') {
+                currentUser = 'admin';
+                document.getElementById('account-name').innerText = '工作室店长';
+                document.getElementById('nav-admin').style.display = 'flex'; 
+                showToast('店长登录成功');
+            } else if (user !== 'admin') {
+                // 其他顾客随便登，这里模拟注册
+                currentUser = user;
+                document.getElementById('account-name').innerText = '顾客 ' + user;
+                document.getElementById('nav-admin').style.display = 'none'; 
+                showToast('登录成功');
+            } else {
+                showToast('账号或密码错误');
+                return;
+            }
+
+            localStorage.setItem('mock_user', currentUser);
+            document.getElementById('login-view').style.display = 'none';
+            document.getElementById('account-view').style.display = 'block';
+            document.getElementById('login-pwd').value = ''; 
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('mock_user');
+            currentUser = null;
+            document.getElementById('login-view').style.display = 'block';
+            document.getElementById('account-view').style.display = 'none';
+            document.getElementById('nav-admin').style.display = 'none';
+            switchTab('portfolio');
+        }
+
+        // ================= 数据加载 =================
+        async function loadPortfolio() {
+            const container = document.getElementById('portfolio-container');
+            const { data } = await supabaseClient.from('portfolios').select('*').order('created_at', { ascending: false });
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div style="grid-column: span 2; text-align:center; color:#888; padding:20px;">暂无成品展示</div>`;
+                return;
+            }
+            container.innerHTML = data.map(item => `
+                <div class="portfolio-item">
+                    <img src="${item.cover_image || 'https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?auto=format&fit=crop&q=80&w=400'}" alt="作品">
+                    <div class="portfolio-info"><h4>${item.title}</h4><p style="font-size:12px; color:#888;">${item.description || ''}</p></div>
+                </div>
+            `).join('');
+        }
+
+        async function loadQueue() {
+            const container = document.getElementById('queue-container');
+            const { data } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: true });
+            
+            let html = `<div class="month-header">${new Date().getFullYear()}年 ${new Date().getMonth() + 1}月</div>`;
+            if (!data || data.length === 0) { html += `<div style="text-align:center; color:#aaa; padding:20px;">暂无排单</div>`; }
+            else {
+                data.forEach(order => {
+                    let bg = 'bg-blue';
+                    if (order.status === '排到了') bg = 'bg-purple';
+                    if (currentUser && order.contact === currentUser) bg = 'bg-yellow';
+                    html += `
+                        <div class="order-card ${bg}" onclick="${bg === 'bg-yellow' ? "switchTab('my-orders'); setTimeout(()=>showOrderDetail('"+order.id+"'), 100)" : "showToast('只能查看自己的订单进度')"}">
+                            <div class="order-card-header"><span>${order.order_no}</span><span>${order.status}</span></div>
+                            <div class="order-title">${order.client_name} · ${order.project_name}</div>
+                            <div class="order-detail">📍 预估排到：${order.estimated_date || '待定'}</div>
+                        </div>`;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        async function loadMyOrders() {
+            if (!currentUser) return;
+            const list = document.getElementById('my-order-list');
+            const { data } = await supabaseClient.from('orders').select('*').eq('contact', currentUser);
+            if (!data || data.length === 0) { list.innerHTML = `<div class="card" style="text-align:center; color:#aaa;">暂无订单</div>`; return; }
+            list.innerHTML = data.map(order => `
+                <div class="card" onclick="showOrderDetail('${order.id}')">
+                    <div style="display:flex; justify-content:space-between;"><b>${order.project_name}</b><span style="color:var(--primary);">${order.status}</span></div>
+                </div>
+            `).join('');
+        }
+
+        async function showOrderDetail(orderId) {
+            document.getElementById('my-order-list').style.display = 'none';
+            const detailView = document.getElementById('order-detail-view');
+            detailView.style.display = 'block';
+            detailView.innerHTML = '加载中...';
+
+            const { data: order } = await supabaseClient.from('orders').select('*').eq('id', orderId).single();
+            const { data: nodes } = await supabaseClient.from('order_nodes').select('*').eq('order_id', orderId).order('node_index');
+            const { data: mats } = await supabaseClient.from('materials').select('*').eq('order_id', orderId);
+
+            let nodesHtml = nodes.map(n => `<div class="timeline-item ${n.is_done ? 'done' : ''}"><div class="t-title">${n.node_index}. ${n.node_name}</div><div class="t-date">${n.is_done ? '已完成' : '等待中...'}</div></div>`).join('');
+            let matsHtml = mats.map(m => `<tr><td>${m.name}</td><td>${m.quantity}</td><td>${m.unit_price}</td><td>${m.is_arrived ? '✅' : '待'}</td></tr>`).join('');
+
+            detailView.innerHTML = `
+                <button class="btn" style="background:#fff; color:var(--primary); margin-bottom:15px;" onclick="closeOrderDetail()">← 返回</button>
+                <div class="card"><h3 style="color:var(--primary);">${order.project_name}</h3><p>状态：${order.status}</p></div>
+                <div class="card"><h4>📝 我的备注</h4><p>版型：${order.remark_pattern || '无'}</p><p>面料：${order.remark_fabric || '无'}</p></div>
+                <div class="card"><h4>🧵 定制流程</h4><div class="timeline">${nodesHtml || '等待更新'}</div></div>
+                <div class="card"><h4>🧵 材料清单</h4><table class="table"><tr><th>材料</th><th>数量</th><th>单价</th><th>到货</th></tr>${matsHtml || '<tr><td colspan="4">暂无</td></tr>'}</table></div>
+            `;
+        }
+
+        function closeOrderDetail() {
+            document.getElementById('my-order-list').style.display = 'block';
+            document.getElementById('order-detail-view').style.display = 'none';
+        }
+
+        async function submitApply(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn'); btn.disabled = true;
+            await supabaseClient.from('applications').insert([{
+                applicant_name: document.getElementById('app-name').value,
+                contact: document.getElementById('app-contact').value,
+                description: document.getElementById('app-desc').value,
+                budget_range: document.getElementById('app-budget').value
+            }]);
+            showToast('🎉 申请已提交'); document.getElementById('apply-form').reset(); btn.disabled = false;
+        }
+
+        // ================= 店长后台 =================
+        async function loadAdminApplications() {
+            const container = document.getElementById('apply-list-container');
+            const { data } = await supabaseClient.from('applications').select('*').eq('status', '待审核');
+            if (!data || data.length === 0) { container.innerHTML = '<div style="text-align:center; color:#aaa;">暂无申请</div>'; return; }
+            container.innerHTML = data.map(app => `
+                <div class="card">
+                    <b>${app.applicant_name} (${app.contact})</b>
+                    <p style="font-size:13px; color:#555; margin:10px 0;">${app.description}</p>
+                    <button class="btn btn-sm" style="background:var(--primary); width:100%;" onclick="acceptApply('${app.id}', '${app.applicant_name}', '${app.contact}')">接单并排期</button>
+                </div>
+            `).join('');
+        }
+
+        async function acceptApply(appId, name, contact) {
+            await supabaseClient.from('applications').update({ status: '已接单' }).eq('id', appId);
+            const orderNo = '#' + Math.floor(1000 + Math.random() * 9000);
+            const { data: newOrder } = await supabaseClient.from('orders').insert([{ order_no: orderNo, client_name: name, contact: contact, project_name: '新定制款', status: '未排到' }]).select().single();
+            
+            const nodes = ['面料预缩', '打版裁片', '缝制拼接', '整烫定型', '细节装饰', '质检包装'].map((n, i) => ({ order_id: newOrder.id, node_index: i + 1, node_name: n }));
+            await supabaseClient.from('order_nodes').insert(nodes);
+            showToast('已接单'); loadAdminApplications(); loadAdminOrders();
+        }
+
+        async function loadAdminOrders() {
+            const container = document.getElementById('manage-list-container');
+            const { data } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+            if (!data || data.length === 0) { container.innerHTML = '<div style="text-align:center; color:#aaa;">暂无排单</div>'; return; }
+            
+            container.innerHTML = data.map(order => `
+                <div class="card">
+                    <b>${order.order_no} ${order.client_name}</b>
+                    <div style="display:flex; gap:5px; margin:10px 0;">
+                        <button class="btn btn-sm" onclick="updateStatus('${order.id}', '未排到')">未排到</button>
+                        <button class="btn btn-sm" onclick="updateStatus('${order.id}', '排到了')">排到了</button>
+                        <button class="btn btn-sm" onclick="updateStatus('${order.id}', '已完成')">已完成</button>
+                    </div>
+                    <button class="btn btn-sm" style="background:#ECD9ED; color:#333; width:100%; margin-top:5px;" onclick="editOrderDetails('${order.id}')">更新制作进度 / 备注</button>
+                </div>
+            `).join('');
+        }
+
+        async function updateStatus(id, status) {
+            await supabaseClient.from('orders').update({ status: status }).eq('id', id);
+            showToast('状态已更新'); loadAdminOrders();
+        }
+
+        async function editOrderDetails(orderId) {
+            const pattern = prompt("输入版型备注（留空不改）:");
+            const fabric = prompt("输入面料备注（留空不改）:");
+            if (pattern || fabric) {
+                await supabaseClient.from('orders').update({ remark_pattern: pattern, remark_fabric: fabric }).eq('id', orderId);
+                showToast('备注已保存');
+            }
+            
+            if(confirm("是否勾选第一个未完成的流程节点？")) {
+                const { data: nodes } = await supabaseClient.from('order_nodes').select('*').eq('order_id', orderId).eq('is_done', false).order('node_index').limit(1);
+                if(nodes && nodes.length > 0) {
+                    await supabaseClient.from('order_nodes').update({ is_done: true, done_at: new Date() }).eq('id', nodes[0].id);
+                    showToast('节点已完成');
+                } else {
+                    showToast('所有流程已完成');
+                }
+            }
+        }
+
+        // ================= 发布成品（带图片上传） =================
+        async function publishPortfolio() {
+            const title = document.getElementById('port-title').value;
+            const desc = document.getElementById('port-desc').value;
+            const fileInput = document.getElementById('port-file');
+            
+            if (!title) { showToast('请填写作品名称'); return; }
+            
+            let imageUrl = '';
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const fileName = `port_${Date.now()}.${file.name.split('.').pop()}`;
+                showToast('正在上传图片...');
+                
+                const { error: uploadError } = await supabaseClient.storage.from('portfolio-images').upload(fileName, file);
+                if (uploadError) { showToast('图片上传失败'); return; }
+                
+                const { data: urlData } = supabaseClient.storage.from('portfolio-images').getPublicUrl(fileName);
+                imageUrl = urlData.publicUrl;
+            }
+
+            await supabaseClient.from('portfolios').insert([{ title, description: desc, cover_image: imageUrl }]);
+            showToast('🎉 发布成功！');
+            document.getElementById('port-title').value = '';
+            document.getElementById('port-desc').value = '';
+            document.getElementById('port-file').value = '';
+            document.getElementById('port-upload-text').innerText = '📷 点击从本地选择图片';
+            loadPortfolio();
+            switchTab('portfolio');
+        }
+
+        window.onload = () => {
+            if (currentUser) {
+                document.getElementById('login-user').value = currentUser;
+                document.getElementById('login-pwd').value = currentUser === 'admin' ? '123456' : '000000';
+                handleLogin();
+            }
+            loadPortfolio(); loadQueue();
+        };
+    </script>
+</body>
+</html>
