@@ -149,6 +149,7 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 .bubble img { max-width: 100%; border-radius: 6px; margin-top: 5px; display: block; cursor: pointer; }
 .msg-actions { display: flex; gap: 8px; margin-top: 4px; font-size: 11px; }
 .msg-actions span { color: var(--text-light); cursor: pointer; padding: 2px 4px; border-radius: 4px; }
+.msg-actions span:hover { background: var(--pink); }
 .msg-actions span.on { color: var(--highlight-border); font-weight: bold; }
 .chat-input { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
 .chat-input input { flex: 1; padding: 10px 15px; border: 1px solid var(--pink); border-radius: 20px; font-size: 14px; outline: none; background: #fff;}
@@ -163,8 +164,23 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 .summary-content .item:last-child { border-bottom: none; }
 .summary-content .empty { color: var(--text-light); font-style: italic; }
 
+.review-node { background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--pink); }
+.review-node.done { border-left-color: var(--primary); }
+.review-node.skip { border-left-color: var(--gray); opacity: .6; }
+.review-node-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.review-node-name { font-size: 14px; font-weight: bold; color: var(--primary); }
+.review-node-meta { font-size: 11px; color: var(--text-light); }
+.review-node-photos { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.review-node-photos img { width: 60px; height: 60px; border-radius: 6px; object-fit: cover; border: 1px solid var(--pink); cursor: pointer; }
+.review-summary { background: linear-gradient(135deg, #FFF9E6, #FFF3C4); border: 1px solid var(--highlight-border); border-radius: 8px; padding: 10px; margin-top: 10px; }
+.review-summary b { font-size: 12px; color: #8a6d00; display: block; margin-bottom: 6px; }
+.review-summary .item { font-size: 12px; color: #6b5b3e; padding: 3px 0; border-bottom: 1px dashed rgba(224,180,0,.3); }
+.review-summary .item:last-child { border-bottom: none; }
+.review-chat { margin-top: 10px; }
+.review-chat .bubble { font-size: 12px; padding: 7px 11px; margin-bottom: 6px; }
+
 .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-.dash-card { background: #fff; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.05); cursor: pointer; position: relative;}
+.dash-card { background: #fff; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.05); cursor: pointer; transition: .1s; position: relative;}
 .dash-card:active { transform: scale(0.95); }
 .dash-num { font-size: 20px; font-weight: bold; color: var(--primary); }
 .dash-num.red { color: var(--danger); }
@@ -177,7 +193,7 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 .admin-sec { display: none; }
 .admin-sec.active { display: block; }
 
-.order-item { background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; position: relative; touch-action: pan-y; }
+.order-item { background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s, box-shadow 0.2s; position: relative; touch-action: pan-y; }
 .order-item.bg-purple { background: linear-gradient(135deg, #f5f0f8, #e6ddec); }
 .order-item.bg-yellow { background: var(--cream); border-left-color: #D4BEA5; }
 .order-item.dragging { opacity: 0.5; transform: scale(0.98); box-shadow: 0 8px 20px rgba(0,0,0,0.15); z-index: 10; }
@@ -242,11 +258,13 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 </head>
 <body>
 
+<!-- 加载页 -->
 <div id="loading" class="loading">
     <div class="spinner"></div>
     <div style="color: var(--primary); font-size: 14px;">加载中…</div>
 </div>
 
+<!-- 主应用（登录后才显示） -->
 <div id="app" style="display:none;">
 
     <!-- 成品展示 -->
@@ -400,11 +418,11 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
         <div class="form-group"><label>密码</label><input type="password" id="login-pwd" placeholder="≥6 位"></div>
         <button class="btn" onclick="doLogin()" id="login-btn">登录</button>
         <button class="btn btn-ghost" style="margin-top:8px;" onclick="openRegisterModal()">注册新账号</button>
-        <button class="btn btn-ghost" style="margin-top:8px;" onclick="enterApp()">游客先逛逛</button>
+        <button class="btn btn-ghost" style="margin-top:8px;" onclick="openForgotModal()">忘记密码</button>
     </div>
 </div>
 
-<!-- 专属链接只读页 -->
+<!-- 专属链接只读页（未登录也能看） -->
 <div id="share-page" class="page" style="display:none;">
     <div class="page-title">订单详情（只读）</div>
     <div id="share-content"></div>
@@ -441,68 +459,115 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 <div id="toast">提示信息</div>
 
 <script type="module">
-/* ⚠️ 请填入你的 Supabase 配置 */
-const SUPABASE_URL = 'https://你的项目ID.supabase.co'; // 替换成你的
-const SUPABASE_ANON_KEY = '你的anon key'; // 替换成你的
+/* ============================================================
+   ⚠️ 修改这两行为你自己的 Supabase 项目配置
+   ============================================================ */
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+/* ============================================================ */
 
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/* ================= 全局状态 ================= */
 const state = {
-    user: null, isLogin: false, isAdmin: false, isShareMode: false,
-    currentMonth: null, currentChatNode: 0, currentOrderDetail: null,
-    album: { list: [], idx: 0 }, monthData: {}, applications: [], orders: [], works: [], chat: {}, summary: {},
-    images: { sketch: [], style: [], detail: [] }, realtimeChannel: null
+    user: null,          // { id, phone, nickname, is_admin }
+    isLogin: false,
+    isAdmin: false,
+    isShareMode: false,  // 专属链接只读
+    shareToken: null,
+    currentMonth: null,
+    currentChatNode: 0,
+    currentOrderDetail: null,
+    album: { list: [], idx: 0 },
+    monthData: {},       // { '2026-07': { label, normalLimit, normalUsed, priorityLimit, priorityUsed } }
+    applications: [],
+    orders: [],
+    works: [],
+    chat: {},            // { orderId: { nodeIndex: [msgs] } }
+    summary: {},         // { orderId: { nodeIndex: '文字' } }
+    remarkLogs: {},
+    images: { sketch: [], style: [], detail: [] },
+    realtimeChannel: null
 };
 
-function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block'; clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 2200); }
+/* ================= 工具函数 ================= */
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg; t.style.display = 'block';
+    clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 2200);
+}
 function closeModal() { document.getElementById('custom-modal').classList.remove('show'); }
-function openModal(html) { document.getElementById('modal-body').innerHTML = html; document.getElementById('custom-modal').classList.add('show'); }
+function openModal(html) {
+    document.getElementById('modal-body').innerHTML = html;
+    document.getElementById('custom-modal').classList.add('show');
+}
+function copyText(t) {
+    navigator.clipboard?.writeText(t).then(() => showToast('已复制')).catch(() => showToast('已复制'));
+}
 function maskPhone(p) { return p ? p.slice(0,3) + '****' + p.slice(7) : ''; }
 function phoneToEmail(phone) { return phone + '@studio.local'; }
+function emailToPhone(email) { return email.split('@')[0]; }
 function fmtDate(d) { if (!d) return ''; const dt = new Date(d); return `${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`; }
-function monthLabel(key) { const [y, m] = key.split('-'); return `${y}年${parseInt(m)}月`; }
+function monthLabel(key) {
+    const [y, m] = key.split('-');
+    const now = new Date();
+    const isCurrent = parseInt(y) === now.getFullYear() && parseInt(m) === now.getMonth() + 1;
+    return `${y}年${parseInt(m)}月${isCurrent ? ' (本月)' : ''}`;
+}
 const NODE_NAMES = ['拆件沟通','版型确认','布料选择','下单确认','面料预缩','打版裁片','缝制拼接','整烫定型','细节装饰','质检包装','寄出/交付'];
 
-/* ================= 认证与初始化 ================= */
+/* ================= 认证 ================= */
 async function initAuth() {
     const { data: { session } } = await sb.auth.getSession();
-    if (session && !session.user.is_anonymous) {
+    if (session) {
         await loadProfile(session.user);
     } else {
-        // 尝试匿名登录以获取公共权限
-        const { error } = await sb.auth.signInAnonymously();
-        if(error) console.log('匿名登录失败，请去Supabase开启Anonymous sign-ins');
+        // 检查是否有专属链接 token
+        const params = new URLSearchParams(location.search);
+        const t = params.get('t');
+        if (t) { state.isShareMode = true; state.shareToken = t; await loadShareOrder(t); }
+        else { showLoginPage(); }
     }
-    await enterApp(); 
+    document.getElementById('loading').style.display = 'none';
 }
-
 async function loadProfile(user) {
-    const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
-    if (data) { state.user = data; state.isLogin = true; state.isAdmin = data.is_admin; }
+    const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    if (error || !data) { showToast('资料加载失败'); await sb.auth.signOut(); showLoginPage(); return; }
+    state.user = { id: data.id, phone: data.phone, nickname: data.nickname, is_admin: data.is_admin };
+    state.isLogin = true;
+    state.isAdmin = data.is_admin;
+    await enterApp();
 }
-
-function showLoginPage() { document.getElementById('login-page').style.display = 'block'; document.getElementById('app').style.display = 'none'; }
-
+function showLoginPage() {
+    document.getElementById('login-page').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('share-page').style.display = 'none';
+}
 async function doLogin() {
     const phone = document.getElementById('login-phone').value.trim();
     const pwd = document.getElementById('login-pwd').value;
     if (!phone || pwd.length < 6) return showToast('请输入手机号和 ≥6 位密码');
-    const btn = document.getElementById('login-btn'); btn.disabled = true; btn.innerText = '登录中…';
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true; btn.innerText = '登录中…';
     const { data, error } = await sb.auth.signInWithPassword({ email: phoneToEmail(phone), password: pwd });
     btn.disabled = false; btn.innerText = '登录';
-    if (error) return showToast('登录失败：' + error.message);
+    if (error) return showToast('登录失败：' + (error.message.includes('Invalid') ? '手机号或密码错误' : error.message));
     await loadProfile(data.user);
-    await enterApp();
 }
-
 function openRegisterModal() {
     openModal(`
         <div class="modal-drag-bar"></div>
-        <div class="modal-header"><h3>注册</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
-        <div class="form-group"><label>手机号</label><input id="reg-phone"></div>
-        <div class="form-group"><label>昵称</label><input id="reg-nick"></div>
-        <div class="form-group"><label>密码</label><input type="password" id="reg-pwd"></div>
+        <div class="modal-header"><h3>注册新账号</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="form-group"><label>手机号</label><input id="reg-phone" placeholder="13800001234"></div>
+        <div class="form-group"><label>昵称</label><input id="reg-nick" placeholder="例如：李女士"></div>
+        <div class="form-group"><label>密码（≥6 位）</label><input type="password" id="reg-pwd"></div>
+        <div class="form-group"><label>确认密码</label><input type="password" id="reg-pwd2"></div>
+        <div class="form-group"><label>密保问题</label>
+            <select id="reg-q"><option>我的第一只宠物叫什么</option><option>我的出生城市</option><option>我最喜欢的颜色</option></select>
+        </div>
+        <div class="form-group"><label>密保答案</label><input id="reg-a"></div>
         <button class="btn" onclick="submitRegister()">注册并登录</button>
     `);
 }
@@ -510,15 +575,32 @@ async function submitRegister() {
     const phone = document.getElementById('reg-phone').value.trim();
     const nick = document.getElementById('reg-nick').value.trim();
     const p1 = document.getElementById('reg-pwd').value;
-    if (!phone || !nick || p1.length < 6) return showToast('请完整填写');
-    const { data, error } = await sb.auth.signUp({ email: phoneToEmail(phone), password: p1, options: { data: { phone, nickname: nick } } });
+    const p2 = document.getElementById('reg-pwd2').value;
+    if (!phone || !nick || p1.length < 6) return showToast('请完整填写，密码 ≥6 位');
+    if (p1 !== p2) return showToast('两次密码不一致');
+    const { data, error } = await sb.auth.signUp({
+        email: phoneToEmail(phone),
+        password: p1,
+        options: { data: { phone, nickname: nick } }
+    });
     if (error) return showToast('注册失败：' + error.message);
+    closeModal(); showToast('注册成功');
     await loadProfile(data.user);
-    closeModal(); await enterApp();
+}
+function openForgotModal() {
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>忘记密码</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <p style="font-size:13px; color:var(--text-light); margin-bottom:15px;">请联系店长重置密码</p>
+        <button class="btn" onclick="closeModal()">知道了</button>
+    `);
+}
+async function doLogout() {
+    await sb.auth.signOut();
+    location.reload();
 }
 
-async function doLogout() { await sb.auth.signOut(); location.reload(); }
-
+/* ================= 应用入口 ================= */
 async function enterApp() {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('share-page').style.display = 'none';
@@ -527,7 +609,6 @@ async function enterApp() {
     await loadAllData();
     renderAccount();
     switchTab('portfolio');
-    document.getElementById('loading').style.display = 'none';
     if (state.isAdmin) setupRealtime();
 }
 
@@ -538,42 +619,66 @@ async function loadAllData() {
     await buildChatFromOrders();
 }
 async function loadMonths() {
-    const { data } = await sb.from('month_settings').select('*');
+    const { data: settings } = await sb.from('month_settings').select('*');
     const months = {};
-    (data || []).forEach(s => months[s.month] = { normalLimit: s.normal_limit, priorityLimit: s.priority_limit, normalUsed: 0, priorityUsed: 0 });
+    (settings || []).forEach(s => months[s.month] = { normalLimit: s.normal_limit, priorityLimit: s.priority_limit, normalUsed: 0, priorityUsed: 0 });
+    // 默认显示当前月 + 后 2 个月
     const now = new Date();
     for (let i = 0; i < 3; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
         if (!months[key]) months[key] = { normalLimit: 10, priorityLimit: 2, normalUsed: 0, priorityUsed: 0 };
     }
-    const { data: orders } = await sb.from('orders').select('schedule_month,is_priority,status').in('status', ['排队中','制作中']);
+    // 统计每月已用
+    const { data: orders } = await sb.from('orders').select('schedule_month,is_priority,status').in('status', ['排队中','制作中','已完成']);
     (orders || []).forEach(o => {
         if (months[o.schedule_month]) {
-            if (o.is_priority) months[o.schedule_month].priorityUsed++; else months[o.schedule_month].normalUsed++;
+            if (o.is_priority) months[o.schedule_month].priorityUsed++;
+            else months[o.schedule_month].normalUsed++;
         }
     });
     Object.keys(months).forEach(k => months[k].label = monthLabel(k));
     state.monthData = months;
-    state.currentMonth = Object.keys(months).sort()[0];
+    const keys = Object.keys(months).sort();
+    state.currentMonth = keys.find(k => k === `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`) || keys[0];
 }
 async function loadWorks() {
-    const { data } = await sb.from('portfolios').select('*').eq('is_hidden', false).order('is_pinned', { ascending: false }).order('sort_order');
-    state.works = (data || []).map(w => ({ id: w.id, title: w.title, category: w.category, desc: w.description, cover: w.cover_image, images: w.detail_images || [], process: w.process, pinned: w.is_pinned }));
+    const { data, error } = await sb.from('portfolios').select('*').eq('is_hidden', false).order('is_pinned', { ascending: false }).order('sort_order');
+    if (error) { console.error(error); return; }
+    state.works = (data || []).map(w => ({
+        id: w.id, title: w.title, category: w.category, desc: w.description,
+        cover: w.cover_image, images: w.detail_images || [], process: w.process,
+        pinned: w.is_pinned, status: w.is_pinned ? '精选置顶' : '正常展示'
+    }));
 }
 async function loadOrders() {
     let q = sb.from('orders').select('*').order('schedule_month', { ascending: true }).order('is_priority', { ascending: false }).order('sort_order');
-    if (!state.isAdmin) q = q.eq('user_id', state.user?.id || '00000000-0000-0000-0000-000000000000');
-    const { data } = await q;
+    if (!state.isAdmin) {
+        const { data: userOrders } = await sb.from('orders').select('*').eq('user_id', state.user.id);
+        q = sb.from('orders').select('*').eq('user_id', state.user.id);
+    }
+    const { data, error } = await q;
+    if (error) { console.error(error); return; }
     state.orders = (data || []).map(o => ({
-        id: o.id, no: o.order_no, name: o.client_name, project: o.project_name, status: o.status, isPriority: o.is_priority, month: o.schedule_month,
-        sortOrder: o.sort_order, estimatedDate: o.estimated_date, estimatedPeriod: o.estimated_period, remarkPattern: o.remark_pattern, remarkFabric: o.remark_fabric,
-        remarkUnread: o.remark_unread, phone: o.contact, shareToken: o.share_token, mine: o.user_id === state.user?.id, nodeIndex: 0, totalNodes: 11, skipped: []
+        id: o.id, no: o.order_no, name: o.client_name, project: o.project_name,
+        status: o.status, isPriority: o.is_priority, month: o.schedule_month,
+        sortOrder: o.sort_order, estimatedDate: o.estimated_date, estimatedPeriod: o.estimated_period,
+        remarkPattern: o.remark_pattern, remarkFabric: o.remark_fabric,
+        remarkUnread: o.remark_unread, changeUnread: o.remark_unread,
+        phone: o.contact, shareToken: o.share_token,
+        summary: o.summary || {},
+        mine: o.user_id === state.user?.id,
+        workGenerated: false,
+        nodeIndex: 0, totalNodes: 11, skipped: []
     }));
+    // 加载节点
     if (state.orders.length) {
-        const { data: nodes } = await sb.from('order_nodes').select('*').in('order_id', state.orders.map(o => o.id)).order('node_index');
+        const ids = state.orders.map(o => o.id);
+        const { data: nodes } = await sb.from('order_nodes').select('*').in('order_id', ids).order('node_index');
+        const nodesByOrder = {};
+        (nodes || []).forEach(n => { (nodesByOrder[n.order_id] = nodesByOrder[n.order_id] || []).push(n); });
         state.orders.forEach(o => {
-            const ns = (nodes || []).filter(n => n.order_id === o.id);
+            const ns = nodesByOrder[o.id] || [];
             o.totalNodes = ns.length || 11;
             o.nodeIndex = ns.filter(n => n.status === '已完成').length;
             o.skipped = ns.filter(n => n.status === '已跳过').map(n => n.node_index);
@@ -585,69 +690,171 @@ async function loadOrders() {
 }
 async function loadApplications() {
     const { data } = await sb.from('applications').select('*').order('created_at', { ascending: false });
-    state.applications = (data || []).map(a => ({ id: a.id, name: a.applicant_name, phone: a.contact, desc: a.description, budget: a.budget_range, priority: a.want_priority, status: a.status, reason: a.reject_reason, images: [...(a.images?.sketch||[]), ...(a.images?.style||[])], createdAt: fmtDate(a.created_at), raw: a }));
+    state.applications = (data || []).map(a => ({
+        id: a.id, name: a.applicant_name, phone: a.contact, desc: a.description,
+        budget: a.budget_range, priority: a.want_priority, status: a.status,
+        reason: a.reject_reason, images: [...(a.images?.sketch||[]), ...(a.images?.style||[]), ...(a.images?.detail||[])],
+        createdAt: fmtDate(a.created_at), raw: a
+    }));
 }
 async function buildChatFromOrders() {
     if (!state.orders.length) return;
-    const { data } = await sb.from('messages').select('*').in('order_id', state.orders.map(o => o.id)).order('created_at');
+    const ids = state.orders.map(o => o.id);
+    const { data } = await sb.from('messages').select('*').in('order_id', ids).order('created_at');
     state.chat = {};
     (data || []).forEach(m => {
         if (!state.chat[m.order_id]) state.chat[m.order_id] = {};
         if (!state.chat[m.order_id][m.node_index]) state.chat[m.order_id][m.node_index] = [];
-        state.chat[m.order_id][m.node_index].push({ id: m.id, role: m.sender_role, text: m.content || (m.image_url ? `<img src="${m.image_url}">` : ''), highlighted: m.highlighted, publishable: m.publishable });
+        state.chat[m.order_id][m.node_index].push({
+            id: m.id, role: m.sender_role, text: m.content || (m.image_url ? `<img src="${m.image_url}">` : ''),
+            highlighted: m.highlighted, publishable: m.publishable, isNotice: m.is_notice
+        });
     });
-    state.orders.forEach(o => { state.summary[o.id] = o.summary || {}; });
+    // 加载 summary
+    state.orders.forEach(o => {
+        state.summary[o.id] = o.summary || {};
+    });
 }
 
-/* ================= 导航 ================= */
+/* ================= 底部导航 ================= */
 function renderBottomNav() {
     const tabs = state.isAdmin
-        ? [{ id: 'portfolio', label: '成品', icon: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' }, { id: 'admin', label: '后台', icon: 'M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z' }, { id: 'account', label: '我的', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' }]
-        : [{ id: 'portfolio', label: '成品', icon: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' }, { id: 'queue', label: '排单', icon: 'M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z' }, { id: 'apply', label: '申请', icon: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z' }, { id: 'my-orders', label: '订单', icon: 'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z' }, { id: 'account', label: '我的', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' }];
-    document.getElementById('bottom-nav').innerHTML = tabs.map(t => `<div class="nav-item" data-tab="${t.id}" onclick="switchTab('${t.id}')"><svg viewBox="0 0 24 24"><path d="${t.icon}"/></svg>${t.label}</div>`).join('');
+        ? [
+            { id: 'portfolio', icon: '<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>', label: '成品' },
+            { id: 'admin', icon: '<path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>', label: '后台' },
+            { id: 'account', icon: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>', label: '我的' }
+        ]
+        : [
+            { id: 'portfolio', icon: '<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>', label: '成品' },
+            { id: 'queue', icon: '<path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>', label: '排单' },
+            { id: 'apply', icon: '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>', label: '申请' },
+            { id: 'my-orders', icon: '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>', label: '订单', dot: 'nav-dot-orders' },
+            { id: 'account', icon: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>', label: '我的' }
+        ];
+    document.getElementById('bottom-nav').innerHTML = tabs.map(t => `
+        <div class="nav-item" data-tab="${t.id}" onclick="switchTab('${t.id}')">
+            <svg viewBox="0 0 24 24">${t.icon}</svg>${t.label}
+            ${t.dot ? `<span class="nav-dot" id="${t.dot}"></span>` : ''}
+        </div>
+    `).join('');
 }
-
 function switchTab(tabId) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     const page = document.getElementById('page-' + tabId);
-    if (page) page.classList.add('active');
+    if (!page) return;
+    page.classList.add('active');
     const nav = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
     if (nav) nav.classList.add('active');
-    
     if (tabId === 'portfolio') renderPortfolio();
     if (tabId === 'queue') renderQueue();
-    if (tabId === 'apply') checkApplyLogin();
-    if (tabId === 'my-orders') renderMyOrders();
+    if (tabId === 'apply') { checkApplyLogin(); }
+    if (tabId === 'my-orders') { renderMyOrders(); markOrdersRead(); }
     if (tabId === 'account') renderAccount();
     if (tabId === 'admin') renderAdmin();
     window.scrollTo(0, 0);
 }
 
-/* ================= 顾客端基础页 ================= */
+/* ================= 账户 ================= */
 function renderAccount() {
     const el = document.getElementById('account-content');
-    if (!state.isLogin) {
-        el.innerHTML = `<div class="card" style="text-align:center;">
-            <p style="margin-bottom:15px; color:var(--text-light);">当前为游客浏览模式</p>
-            <button class="btn" onclick="showLoginPage()">去登录 / 注册</button>
-        </div>`;
-        return;
+    if (state.isAdmin) {
+        el.innerHTML = `
+            <div class="card">
+                <h3 style="color:var(--primary);">${state.user.nickname}</h3>
+                <p style="font-size:12px; color:var(--text-light); margin-top:5px;">${maskPhone(state.user.phone)} · 店长</p>
+            </div>
+            <div class="card" onclick="switchTab('admin')" style="background:var(--primary); color:#fff; text-align:center; cursor:pointer;">
+                <b>⚙️ 进入店长工作台</b>
+            </div>
+            <div class="card">
+                <button class="btn btn-danger" onclick="doLogout()">退出登录</button>
+            </div>
+        `;
+    } else {
+        el.innerHTML = `
+            <div class="card">
+                <h3 style="color:var(--primary);">${state.user.nickname}</h3>
+                <p style="font-size:12px; color:var(--text-light); margin-top:5px;">${maskPhone(state.user.phone)}</p>
+            </div>
+            <div class="card">
+                <button class="btn btn-ghost" onclick="openEditProfileModal('name')">修改昵称</button>
+                <button class="btn btn-ghost" style="margin-top:8px;" onclick="openEditProfileModal('pwd')">修改密码</button>
+                <button class="btn btn-ghost" style="margin-top:8px;" onclick="openSizePresetModal()">身体尺寸预设</button>
+                <button class="btn btn-danger" style="margin-top:8px;" onclick="doLogout()">退出登录</button>
+            </div>
+        `;
     }
-    el.innerHTML = `
-        <div class="card">
-            <h3 style="color:var(--primary);">${state.user.nickname}</h3>
-            <p style="font-size:12px; color:var(--text-light); margin-top:5px;">${maskPhone(state.user.phone)} ${state.isAdmin ? '· 店长' : ''}</p>
+}
+function openEditProfileModal(type) {
+    const isName = type === 'name';
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>${isName ? '修改昵称' : '修改密码'}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        ${isName
+            ? `<div class="form-group"><input id="new-nick" value="${state.user.nickname}"></div>`
+            : `<div class="form-group"><input type="password" id="new-pwd" placeholder="新密码（≥6 位）"></div>`}
+        <button class="btn" onclick="saveProfile('${type}')">保存</button>
+    `);
+}
+async function saveProfile(type) {
+    if (type === 'name') {
+        const v = document.getElementById('new-nick').value.trim();
+        if (!v) return showToast('昵称不能为空');
+        const { error } = await sb.from('profiles').update({ nickname: v }).eq('id', state.user.id);
+        if (error) return showToast('修改失败');
+        state.user.nickname = v;
+    } else {
+        const v = document.getElementById('new-pwd').value;
+        if (v.length < 6) return showToast('密码 ≥6 位');
+        const { error } = await sb.auth.updateUser({ password: v });
+        if (error) return showToast('修改失败：' + error.message);
+    }
+    closeModal(); renderAccount(); showToast('修改成功');
+}
+function openSizePresetModal() {
+    const p = JSON.parse(localStorage.getItem('sizePreset') || '{}');
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>我的预设尺寸</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="size-grid">
+            <div class="size-field"><label>身高（cm）</label><input type="number" id="pre-h" value="${p.h||''}"></div>
+            <div class="size-field"><label>体重（kg）</label><input type="number" id="pre-w" value="${p.w||''}"></div>
+            <div class="size-field"><label>胸围（cm）</label><input type="number" id="pre-b" value="${p.b||''}"></div>
+            <div class="size-field"><label>腰围（cm）</label><input type="number" id="pre-wa" value="${p.wa||''}"></div>
+            <div class="size-field"><label>臀围（cm）</label><input type="number" id="pre-hip" value="${p.hip||''}"></div>
+            <div class="size-field"><label>肩宽（cm）</label><input type="number" id="pre-s" value="${p.s||''}"></div>
         </div>
-        <div class="card">
-            <button class="btn btn-danger" onclick="doLogout()">退出登录</button>
-        </div>
-    `;
+        <button class="btn" onclick="saveSizePreset()">保存预设</button>
+    `);
+}
+function saveSizePreset() {
+    const p = {
+        h: document.getElementById('pre-h').value, w: document.getElementById('pre-w').value,
+        b: document.getElementById('pre-b').value, wa: document.getElementById('pre-wa').value,
+        hip: document.getElementById('pre-hip').value, s: document.getElementById('pre-s').value
+    };
+    localStorage.setItem('sizePreset', JSON.stringify(p));
+    closeModal(); showToast('预设已保存');
+}
+function useSizePreset() {
+    const p = JSON.parse(localStorage.getItem('sizePreset') || 'null');
+    if (!p) return showToast('请先在「我的」里设置预设尺寸');
+    document.getElementById('sz-height').value = p.h;
+    document.getElementById('sz-weight').value = p.w;
+    document.getElementById('sz-bust').value = p.b;
+    document.getElementById('sz-waist').value = p.wa;
+    document.getElementById('sz-hip').value = p.hip;
+    document.getElementById('sz-shoulder').value = p.s;
+    showToast('已一键填入');
 }
 
+/* ================= 成品展示 ================= */
 function renderPortfolio(cat = '全部') {
     const cats = ['全部', ...new Set(state.works.map(w => w.category).filter(Boolean))];
-    document.getElementById('portfolio-filters').innerHTML = cats.map(c => `<div class="filter-pill ${c === cat ? 'active' : ''}" onclick="renderPortfolio('${c}')">${c}</div>`).join('');
+    document.getElementById('portfolio-filters').innerHTML = cats.map(c =>
+        `<div class="filter-pill ${c === cat ? 'active' : ''}" onclick="renderPortfolio('${c}')">${c}</div>`
+    ).join('');
     const list = state.works.filter(w => cat === '全部' || w.category === cat);
     document.getElementById('portfolio-container').innerHTML = list.map(w => `
         <div class="pf-item" onclick="openPortfolio(${w.id})">
@@ -657,7 +864,6 @@ function renderPortfolio(cat = '全部') {
         </div>
     `).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px; grid-column:span 2;">暂无作品</p>';
 }
-
 function openPortfolio(id) {
     const w = state.works.find(x => x.id === id);
     if (!w) return;
@@ -667,43 +873,85 @@ function openPortfolio(id) {
         <div class="modal-header"><h3>${w.title}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
         <img src="${w.cover}" style="width:100%; border-radius:12px;">
         <p style="font-size:13px; color:var(--text-light); margin-top:10px;">${w.desc || ''}</p>
-        <div class="gallery-tabs"><div class="g-tab active" onclick="switchGallery(this, 'g1')">作品展示</div></div>
+        <div class="gallery-tabs">
+            <div class="g-tab active" onclick="switchGallery(this, 'g1')">作品展示</div>
+            <div class="g-tab" onclick="switchGallery(this, 'g2')">工艺细节</div>
+        </div>
         <div id="g1" class="gallery-content"><img src="${w.cover}" onclick="openAlbum([{url:'${w.cover}',caption:'作品'}],0)"></div>
-        ${hasProcess ? `<div class="card" style="background:var(--bg); margin-top:20px; cursor:pointer;" onclick="openProcessReview(${w.id})"><b style="font-size:13px; color:var(--primary);">📖 制作过程回顾</b></div>` : ''}
+        <div id="g2" class="gallery-content" style="display:none;">${(w.images||[]).map(u => `<img src="${u}" onclick="openAlbum([{url:'${u}',caption:'细节'}],0)">`).join('') || '<p style="font-size:12px; color:var(--text-light); grid-column:span 3;">暂无细节图</p>'}</div>
+        ${hasProcess ? `
+            <div class="card" style="background:var(--bg); margin-top:20px; cursor:pointer;" onclick="openProcessReview(${w.id})">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <b style="font-size:13px; color:var(--primary);">📖 制作过程回顾</b>
+                        <div style="font-size:11px; color:var(--text-light); margin-top:3px;">${w.process.nodes.length} 个节点</div>
+                    </div>
+                    <span style="color:var(--primary); font-size:20px;">›</span>
+                </div>
+            </div>
+        ` : ''}
         <button class="btn" onclick="closeModal(); switchTab('apply'); prefillFromWork('${w.title.replace(/'/g,"\\'")}');">✨ 同款定制</button>
     `);
 }
-function switchGallery(el, id) { el.parentElement.querySelectorAll('.g-tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); el.parentElement.querySelectorAll('.gallery-content').forEach(c => c.style.display = 'none'); document.getElementById(id).style.display = 'grid'; }
-function prefillFromWork(title) { const d = document.getElementById('apply-desc'); if (d) d.value = `想参考作品《${title}》定做`; showToast('已带入参考'); }
+function switchGallery(el, id) {
+    el.parentElement.querySelectorAll('.g-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    el.parentElement.querySelectorAll('.gallery-content').forEach(c => c.style.display = 'none');
+    document.getElementById(id).style.display = 'grid';
+}
+function prefillFromWork(title) {
+    const d = document.getElementById('apply-desc');
+    if (d) d.value = `想参考作品《${title}》定做`;
+    showToast('已带入参考');
+}
 function openProcessReview(workId) {
     const w = state.works.find(x => x.id === workId);
     if (!w?.process) return;
-    const html = w.process.nodes.map((n, i) => `
-        <div class="card" style="padding:10px; margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-between;"><b style="color:var(--primary);">${i+1}. ${n.name}</b><span>${n.status}</span></div>
-            ${n.photos?.length ? `<div style="display:flex; gap:6px; margin-top:8px;">${n.photos.map(p => `<img src="${p.url}" style="width:60px; height:60px; border-radius:6px; object-fit:cover;">`).join('')}</div>` : ''}
-            ${n.summary ? `<div style="background:#FFF9E6; padding:8px; border-radius:6px; font-size:12px; color:#8a6d00; margin-top:8px;">⭐ ${n.summary}</div>` : ''}
-        </div>
-    `).join('');
-    openModal(`<div class="modal-drag-bar"></div><div class="modal-header"><h3>📖 制作过程回顾</h3><div class="modal-close" onclick="closeModal()">✕</div></div>${html}<button class="btn" onclick="closeModal(); openPortfolio(${workId})">返回</button>`);
+    const html = w.process.nodes.map((n, i) => {
+        let cls = 'review-node';
+        if (n.status === '已完成') cls += ' done';
+        else if (n.status === '已跳过') cls += ' skip';
+        return `
+            <div class="${cls}">
+                <div class="review-node-head">
+                    <span class="review-node-name">${i + 1}. ${n.name}</span>
+                    <span class="review-node-meta">${n.status}${n.doneAt ? ' · '+n.doneAt : ''}</span>
+                </div>
+                ${n.photos?.length ? `<div class="review-node-photos">${n.photos.map(p => `<img src="${p.url}" onclick="openAlbum(${JSON.stringify(n.photos).replace(/"/g,'&quot;')},${n.photos.indexOf(p)})">`).join('')}</div>` : ''}
+                ${n.summary ? `<div class="review-summary"><b>⭐ 交流重点</b>${n.summary.split('\n').filter(x=>x.trim()).map(x=>`<div class="item">· ${x}</div>`).join('')}</div>` : ''}
+                ${n.publicChat?.length ? `<div class="review-chat"><div style="font-size:11px;color:var(--text-light);margin-bottom:6px;">💬 精选对话</div>${n.publicChat.map(m=>`<div class="bubble ${m.role}" style="${m.role==='admin'?'background:var(--primary);color:#fff;':''}">${m.text}</div>`).join('')}</div>` : ''}
+            </div>
+        `;
+    }).join('');
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>📖 制作过程回顾</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <p style="font-size:12px; color:var(--text-light); margin-bottom:15px;">${w.title}</p>
+        ${html}
+        <button class="btn" onclick="closeModal(); openPortfolio(${workId})">返回作品</button>
+    `);
 }
 
+/* ================= 排单 ================= */
 function renderQueue() {
     const months = Object.keys(state.monthData).sort();
-    document.getElementById('month-tabs').innerHTML = months.map(m => `<div class="month-pill ${m === state.currentMonth ? 'active' : ''}" onclick="switchMonth('${m}')">${state.monthData[m].label}</div>`).join('');
+    document.getElementById('month-tabs').innerHTML = months.map(m =>
+        `<div class="month-pill ${m === state.currentMonth ? 'active' : ''}" onclick="switchMonth('${m}')">${state.monthData[m].label}</div>`
+    ).join('');
     const md = state.monthData[state.currentMonth];
     if (!md) return;
     const nFull = md.normalUsed >= md.normalLimit;
     const pFull = md.priorityUsed >= md.priorityLimit;
     document.getElementById('month-head').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <b style="color:var(--primary); font-size:15px;">${md.label} 排单容量</b>
+            <b style="color:var(--primary); font-size:15px;">${md.label.replace(/ \(.*\)/, '')} 排单容量</b>
             <span style="font-size:12px; color:${nFull ? 'var(--primary2)' : '#2a8b3a'};">${nFull ? '已满' : '未满'}</span>
         </div>
         <div class="cap-line"><span>订单位 ${md.normalUsed}/${md.normalLimit}</span><span>加急 ${md.priorityUsed}/${md.priorityLimit}</span></div>
         <div class="cap-bg"><div class="cap-fill ${nFull ? 'full' : ''}" style="width:${Math.min(100, md.normalUsed/md.normalLimit*100)}%"></div></div>
         <div class="cap-bg"><div class="cap-fill ${pFull ? 'full' : ''}" style="width:${Math.min(100, md.priorityUsed/md.priorityLimit*100)}%"></div></div>
     `;
+    // 顾客看所有；脱敏。店长直接去后台
     const list = state.orders.filter(o => o.month === state.currentMonth && o.status !== '已取消').sort((a, b) => {
         const aDone = a.status === '已完成', bDone = b.status === '已完成';
         if (aDone !== bDone) return aDone ? 1 : -1;
@@ -718,18 +966,22 @@ function renderQueue() {
         else if (mine) cls += ' mine';
         else if (done) cls += ' done';
         else if (o.status === '制作中') cls += ' bg-purple';
+        const dots = Array.from({ length: o.totalNodes }).map((_, i) => {
+            if (o.skipped.includes(i)) return '';
+            return `<div class="oc-dot ${i < o.nodeIndex ? 'on' : ''}"></div>`;
+        }).join('');
         const displayName = mine ? o.name : (o.name?.charAt(0) || '') + '**';
         return `
             <div class="${cls}" onclick="onQueueClick('${o.id}')">
                 ${mine ? '<div class="mine-badge">⭐ 我的</div>' : ''}
                 <div class="oc-head"><span>${o.no} ${o.isPriority ? '<span class="oc-priority">⚡加急</span>' : ''}</span><span class="oc-badge">${o.status}</span></div>
                 <div class="oc-title">${displayName} · ${o.project}</div>
+                <div class="oc-dots">${dots} <span style="margin-left:6px;">${o.nodeIndex}/${o.totalNodes}</span></div>
             </div>
         `;
     }).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px;">本月暂无订单</p>';
     updateSelfTip();
 }
-
 function switchMonth(m) { state.currentMonth = m; renderQueue(); }
 function updateSelfTip() {
     const tip = document.getElementById('self-tip');
@@ -737,8 +989,12 @@ function updateSelfTip() {
     if (state.isAdmin || !state.isLogin) { tip.style.display = 'none'; return; }
     const mine = state.orders.find(o => o.mine && o.status !== '已完成' && o.month === state.currentMonth);
     if (!mine) { tip.style.display = 'none'; return; }
+    const before = state.orders.filter(o =>
+        o.month === mine.month && o.status !== '已完成' && !o.mine &&
+        (o.isPriority && !mine.isPriority || (o.isPriority === mine.isPriority && o.sortOrder < mine.sortOrder))
+    ).length;
     tip.style.display = 'block';
-    tip.innerHTML = `你的订单 <b>${mine.no}</b> 正在排队中`;
+    tip.innerHTML = `你的订单 <b>${mine.no}</b> 前面还有 <b>${before}</b> 单，请耐心等待～`;
 }
 function onQueueClick(id) {
     if (state.isAdmin) { switchTab('admin'); switchAdminTab('orders'); setTimeout(() => openOrderDetail(id), 100); return; }
@@ -750,84 +1006,161 @@ function onQueueClick(id) {
 }
 
 /* ================= 申请 ================= */
-function checkApplyLogin() { 
-    if (!state.isLogin) document.getElementById('login-hint').style.display = 'block'; 
-    else {
-        document.getElementById('login-hint').style.display = 'none';
-        if (!document.getElementById('apply-name').value) document.getElementById('apply-name').value = state.user.nickname;
-        if (!document.getElementById('apply-contact').value) document.getElementById('apply-contact').value = state.user.phone;
-    }
+function checkApplyLogin() {
+    document.getElementById('login-hint').style.display = 'none';
+    const n = document.getElementById('apply-name');
+    const c = document.getElementById('apply-contact');
+    if (n && !n.value) n.value = state.user.nickname;
+    if (c && !c.value) c.value = state.user.phone;
 }
-function onPriorityChange(el) { document.getElementById('priority-hint').style.display = el.checked ? 'block' : 'none'; }
-function addImages(kind, input) { Array.from(input.files || []).slice(0, 6 - state.images[kind].length).forEach(f => state.images[kind].push({ file: f, url: URL.createObjectURL(f) })); input.value = ''; renderImageRow(kind); }
-function renderImageRow(kind) { document.getElementById('row-' + kind).innerHTML = state.images[kind].map((img, i) => `<div class="img-thumb"><img src="${img.url}"><div class="del" onclick="state.images['${kind}'].splice(${i},1);renderImageRow('${kind}')">✕</div></div>`).join(''); }
-function useSizePreset() { showToast('预设尺寸已自动填入'); }
-
+function onPriorityChange(el) {
+    document.getElementById('priority-hint').style.display = el.checked ? 'block' : 'none';
+}
+function addImages(kind, input) {
+    const files = Array.from(input.files || []);
+    const remain = 6 - state.images[kind].length;
+    files.slice(0, remain).forEach(f => state.images[kind].push({ file: f, url: URL.createObjectURL(f) }));
+    input.value = '';
+    renderImageRow(kind);
+}
+function renderImageRow(kind) {
+    const row = document.getElementById('row-' + kind);
+    row.innerHTML = state.images[kind].map((img, i) =>
+        `<div class="img-thumb"><img src="${img.url}"><div class="del" onclick="removeImage('${kind}',${i})">✕</div></div>`
+    ).join('') + (state.images[kind].length < 6 ? `<div class="img-thumb add" onclick="document.getElementById('up-${kind}').click()">+</div>` : '');
+}
+function removeImage(kind, i) { state.images[kind].splice(i, 1); renderImageRow(kind); }
+async function uploadImages(kind) {
+    const urls = [];
+    for (const img of state.images[kind]) {
+        const ext = img.file.name.split('.').pop();
+        const path = `${state.user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { data, error } = await sb.storage.from('application-images').upload(path, img.file);
+        if (!error) {
+            const { data: { publicUrl } } = sb.storage.from('application-images').getPublicUrl(path);
+            urls.push(publicUrl);
+        }
+    }
+    return urls;
+}
 async function submitApply(e) {
     e.preventDefault();
-    if (!state.isLogin) return showToast('请先登录再提交申请');
-    const btn = document.getElementById('apply-submit-btn'); btn.disabled = true; btn.innerText = '提交中…';
-    let sketch = [], style = [], detail = [];
-    
-    for (const img of state.images.sketch) { const { data } = await sb.storage.from('application-images').upload(`${state.user.id}/${Date.now()}_s`, img.file); if(data) sketch.push(sb.storage.from('application-images').getPublicUrl(data.path).data.publicUrl); }
-    for (const img of state.images.style) { const { data } = await sb.storage.from('application-images').upload(`${state.user.id}/${Date.now()}_st`, img.file); if(data) style.push(sb.storage.from('application-images').getPublicUrl(data.path).data.publicUrl); }
-    for (const img of state.images.detail) { const { data } = await sb.storage.from('application-images').upload(`${state.user.id}/${Date.now()}_d`, img.file); if(data) detail.push(sb.storage.from('application-images').getPublicUrl(data.path).data.publicUrl); }
-    
+    const name = document.getElementById('apply-name').value;
+    const contact = document.getElementById('apply-contact').value;
+    const desc = document.getElementById('apply-desc').value;
+    if (!name || !contact || !desc) return showToast('请填写必填项');
+    const btn = document.getElementById('apply-submit-btn');
+    btn.disabled = true; btn.innerText = '提交中…';
+    // 上传图片
+    const sketch = await uploadImages('sketch');
+    const style = await uploadImages('style');
+    const detail = await uploadImages('detail');
+    const bodySize = {
+        height: document.getElementById('sz-height').value,
+        weight: document.getElementById('sz-weight').value,
+        bust: document.getElementById('sz-bust').value,
+        waist: document.getElementById('sz-waist').value,
+        hip: document.getElementById('sz-hip').value,
+        shoulder: document.getElementById('sz-shoulder').value
+    };
     const { error } = await sb.from('applications').insert({
-        user_id: state.user.id, applicant_name: document.getElementById('apply-name').value, contact: document.getElementById('apply-contact').value,
-        description: document.getElementById('apply-desc').value, budget_range: document.getElementById('apply-budget').value,
-        want_priority: document.getElementById('apply-priority').checked, images: { sketch, style, detail }, special_request: document.getElementById('apply-special').value, status: '待审核'
+        user_id: state.user.id, applicant_name: name, contact: contact,
+        description: desc, budget_range: document.getElementById('apply-budget').value,
+        expected_date: document.getElementById('expected-time').value === 'date' ? document.getElementById('apply-date').value : '不急',
+        want_priority: document.getElementById('apply-priority').checked,
+        body_size: bodySize,
+        images: { sketch, style, detail },
+        special_request: document.getElementById('apply-special').value,
+        status: '待审核'
     });
-    
     btn.disabled = false; btn.innerText = '提交申请';
-    if (error) return showToast('提交失败');
-    document.getElementById('apply-form-area').style.display = 'none'; document.getElementById('apply-success-area').style.display = 'block';
+    if (error) return showToast('提交失败：' + error.message);
+    document.getElementById('apply-form-area').style.display = 'none';
+    document.getElementById('apply-success-area').style.display = 'block';
+    state.images = { sketch: [], style: [], detail: [] };
+    ['sketch','style','detail'].forEach(renderImageRow);
+    await loadApplications();
 }
 
 /* ================= 我的订单 ================= */
 function renderMyOrders() {
-    document.getElementById('my-order-list').style.display = 'block'; document.getElementById('order-detail-view').style.display = 'none';
-    if (!state.isLogin) { document.getElementById('my-order-list').innerHTML = '<p style="text-align:center; padding:20px;">请先登录</p>'; return; }
-    const list = state.orders.filter(o => o.mine);
-    document.getElementById('my-order-list').innerHTML = list.map(o => `
+    document.getElementById('my-order-list').style.display = 'block';
+    document.getElementById('order-detail-view').style.display = 'none';
+    document.getElementById('my-apply-list').style.display = 'block';
+
+    if (state.isAdmin) {
+        document.getElementById('my-apply-list').innerHTML = '';
+        document.getElementById('my-order-list').innerHTML = '<p style="text-align:center; color:var(--text-light); padding:20px;">店长请去后台查看全部订单</p>';
+        return;
+    }
+
+    const apps = state.applications || [];
+    document.getElementById('my-apply-list').innerHTML = apps.length ? apps.map(a => `
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <b style="font-size:14px;">${a.desc.slice(0, 20)}</b>
+                <span class="apply-status ${a.status === '待审核' ? 'pending' : a.status === '已接单' ? 'accepted' : 'rejected'}">${a.status}</span>
+            </div>
+            ${a.status === '已拒绝' && a.reason ? `<div class="reject-reason">拒绝原因：${a.reason}</div>` : ''}
+        </div>
+    `).join('') + `<div style="font-size:13px; color:var(--text-light); margin:15px 0 10px 5px;">我的订单</div>` : '';
+
+    const myOrders = state.orders.filter(o => o.mine);
+    document.getElementById('my-order-list').innerHTML = myOrders.map(o => `
         <div class="card card-click" onclick="openCustomerOrderDetail('${o.id}')">
             <div style="display:flex; justify-content:space-between;">
                 <b>${o.project}</b>
                 <span style="color:${o.status === '已完成' ? 'var(--gray)' : 'var(--primary)'}; font-weight:bold;">${o.status}</span>
             </div>
-            <div style="font-size:12px; color:var(--text-light); margin-top:6px;">${o.no} · 当前节点：${o.nodeNames?.[o.nodeIndex] || '已完成'}</div>
+            <div style="font-size:12px; color:var(--text-light); margin-top:6px;">
+                ${o.no} · 当前节点：${o.nodeNames?.[o.nodeIndex] || '已完成'}
+            </div>
         </div>
-    `).join('') || '<p style="text-align:center; padding:20px;">暂无订单</p>';
+    `).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px;">暂无订单，去申请一件吧</p>';
 }
-
 function openCustomerOrderDetail(id) {
     const o = state.orders.find(x => x.id === id);
-    state.currentOrderDetail = o; state.currentChatNode = Math.min(o.nodeIndex, o.totalNodes - 1);
-    document.getElementById('my-order-list').style.display = 'none'; document.getElementById('my-apply-list').style.display = 'none';
-    document.getElementById('order-detail-view').style.display = 'block';
+    if (!o) return;
+    state.currentOrderDetail = o;
+    state.currentChatNode = Math.min(o.nodeIndex, o.totalNodes - 1);
+    document.getElementById('my-order-list').style.display = 'none';
+    document.getElementById('my-apply-list').style.display = 'none';
+    const view = document.getElementById('order-detail-view');
+    view.style.display = 'block';
     const isDone = o.status === '已完成';
     const tlHtml = renderTimeline(o);
-    document.getElementById('order-detail-view').innerHTML = `
+    const remarkLocked = o.status !== '排队中';
+    view.innerHTML = `
         <button class="btn btn-ghost" style="margin-bottom:12px;" onclick="renderMyOrders()">← 返回</button>
+        ${isDone ? `<button class="btn" style="background:var(--danger); margin-bottom:15px;" onclick="openRateModal()">⭐ 评价与返图</button>` : ''}
         <div class="card">
             <div style="display:flex;justify-content:space-between;">
                 <h3 style="color:var(--primary);">${o.project}</h3>
                 <span style="font-weight:bold;color:${isDone ? 'var(--gray)' : 'var(--primary)'};">${o.status}</span>
             </div>
-            <div style="font-size:12px; color:var(--text-light); margin-top:6px;">${o.no}</div>
+            <div style="font-size:12px; color:var(--text-light); margin-top:6px;">${o.no} · 预计 ${o.estimatedDate || ('本月' + (o.estimatedPeriod || '中旬'))}</div>
+        </div>
+        <div class="card">
+            <h4 style="color:var(--primary);margin-bottom:8px;">备注信息</h4>
+            <div class="remark-box">
+                <div class="remark-item"><span>版型：</span>${o.remarkPattern || '—'}</div>
+                <div class="remark-item"><span>面料：</span>${o.remarkFabric || '—'}</div>
+            </div>
+            ${remarkLocked
+                ? `<div class="lock-tip">🔒 已开始制作，如需修改请留言</div>`
+                : `<button class="btn btn-ghost" style="margin-top:8px;" onclick="openEditRemarkModal('${o.id}')">编辑备注</button>`}
         </div>
         <div class="card">
             <h4 style="color:var(--primary);margin-bottom:8px;">🧵 定制流程</h4>
             <div class="timeline">${tlHtml}</div>
         </div>
-        <div class="card" id="chat-card">
+        <div class="card">
             <h4 style="color:var(--primary); margin-bottom:8px;">沟通记录 · 按节点</h4>
             <div class="node-selector" id="node-selector">${renderNodeTabs(o)}</div>
             <div id="chat-area">${renderChatArea(o)}</div>
         </div>
     `;
 }
-
 function renderTimeline(o) {
     const names = o.nodeNames || NODE_NAMES;
     return names.map((name, i) => {
@@ -844,7 +1177,9 @@ function renderTimeline(o) {
 }
 function renderNodeTabs(o) {
     const names = o.nodeNames || NODE_NAMES;
-    return names.map((name, i) => `<div class="node-pill ${i === state.currentChatNode ? 'active' : ''}" onclick="switchChatNode('${o.id}', ${i})">${i + 1}. ${name}</div>`).join('');
+    return names.map((name, i) => `
+        <div class="node-pill ${i === state.currentChatNode ? 'active' : ''}" onclick="switchChatNode('${o.id}', ${i})">${i + 1}. ${name}</div>
+    `).join('');
 }
 function renderChatArea(o) {
     const msgs = state.chat[o.id]?.[state.currentChatNode] || [];
@@ -885,19 +1220,65 @@ async function sendCustomerMsg(orderId) {
     document.getElementById('chat-area').innerHTML = renderChatArea(o);
     const cb = document.getElementById('chat-box'); if (cb) cb.scrollTop = cb.scrollHeight;
 }
+function openEditRemarkModal(orderId) {
+    const o = state.orders.find(x => x.id === orderId);
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>编辑备注</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="form-group"><label>版型备注</label><input id="edit-remark-pattern" value="${o.remarkPattern || ''}"></div>
+        <div class="form-group"><label>面料备注</label><input id="edit-remark-fabric" value="${o.remarkFabric || ''}"></div>
+        <button class="btn" onclick="saveRemark('${orderId}')">保存（需二次确认）</button>
+    `);
+}
+async function saveRemark(orderId) {
+    const pattern = document.getElementById('edit-remark-pattern').value;
+    const fabric = document.getElementById('edit-remark-fabric').value;
+    closeModal();
+    if (!confirm('确认修改备注？修改后会通知店长。')) return;
+    const o = state.orders.find(x => x.id === orderId);
+    const updates = {};
+    if (pattern !== o.remarkPattern) {
+        updates.remark_pattern = pattern;
+        await sb.from('remark_logs').insert({ order_id: parseInt(orderId), field: 'pattern', old_value: o.remarkPattern, new_value: pattern });
+    }
+    if (fabric !== o.remarkFabric) {
+        updates.remark_fabric = fabric;
+        await sb.from('remark_logs').insert({ order_id: parseInt(orderId), field: 'fabric', old_value: o.remarkFabric, new_value: fabric });
+    }
+    if (Object.keys(updates).length) {
+        updates.remark_unread = true;
+        await sb.from('orders').update(updates).eq('id', parseInt(orderId));
+        o.remarkPattern = pattern; o.remarkFabric = fabric;
+        showToast('已修改并通知店长');
+    } else {
+        showToast('无变化');
+    }
+}
 
 /* ================= 店长后台 ================= */
 async function renderAdmin() {
-    await loadApplications(); await loadOrders();
-    renderDashboard(); renderApplyList(); renderMake(); renderOrderManageList(); renderWorks(); renderAccount();
+    await loadApplications();
+    await loadOrders();
+    renderDashboard();
+    renderApplyList();
+    renderMake();
+    renderOrderManageList();
+    renderWorks();
+    renderAccount();
 }
 function renderDashboard() {
     const pending = state.applications.filter(a => a.status === '待审核').length;
+    const unread = state.orders.filter(o => o.remarkUnread).length;
     const md = state.monthData[state.currentMonth];
+    const making = state.orders.filter(o => o.status === '制作中').length;
     document.getElementById('dash-grid').innerHTML = `
         <div class="dash-card" onclick="switchAdminTab('review')">
             ${pending > 0 ? '<div class="dot"></div>' : ''}
             <div class="dash-num">${pending}</div><div class="dash-label">待审核</div>
+        </div>
+        <div class="dash-card" onclick="switchAdminTab('orders')">
+            ${unread > 0 ? '<div class="dot"></div>' : ''}
+            <div class="dash-num">${unread}</div><div class="dash-label">未读留言</div>
         </div>
         <div class="dash-card" onclick="switchAdminTab('make')">
             <div class="dash-num">${md?.normalUsed || 0}/${md?.normalLimit || 0}</div><div class="dash-label">本月单</div>
@@ -925,48 +1306,105 @@ function renderApplyList(tab = 'pending') {
     document.getElementById('apply-list').innerHTML = list.length ? list.map(a => `
         <div class="card">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                <b>${a.name}</b><span style="font-size:12px; color:#888;">${a.createdAt}</span>
+                <b>${a.name} (${maskPhone(a.phone)})</b>
+                <span style="font-size:12px; color:#888;">${a.createdAt}</span>
             </div>
             <p style="font-size:13px; color:#555; margin-bottom:8px;">${a.desc}</p>
+            <div style="font-size:12px; color:var(--text-light); margin-bottom:8px;">预算：${a.budget} · 加急：${a.priority ? '是' : '否'}</div>
             ${a.images.length ? `<div class="img-row" style="margin-bottom:10px;">${a.images.map(u => `<div class="img-thumb"><img src="${u}" onclick="openAlbum([{url:'${u}',caption:'参考图'}],0)"></div>`).join('')}</div>` : ''}
             ${tab === 'pending' ? `
                 <div style="display:flex; gap:10px;">
                     <button class="btn btn-sm" style="flex:1;" onclick="openAcceptModal(${a.id})">接单</button>
-                    <button class="btn btn-sm btn-danger" style="flex:1;" onclick="sb.from('applications').update({status:'已拒绝'}).eq('id',${a.id}).then(()=>renderAdmin())">拒绝</button>
+                    <button class="btn btn-sm btn-danger" style="flex:1;" onclick="openRejectModal(${a.id})">不接</button>
                 </div>
             ` : tab === 'rejected' ? `<div class="reject-reason">拒绝原因：${a.reason || '未填写'}</div>` : '<div style="font-size:12px; color:var(--primary);">已生成订单</div>'}
+            ${tab !== 'pending' ? `<button class="btn btn-sm btn-ghost" style="margin-top:8px;" onclick="copyText('${a.phone}')">📋 复制联系方式</button>` : ''}
         </div>
-    `).join('') : '<p style="text-align:center; padding:20px;">暂无数据</p>';
+    `).join('') : '<p style="text-align:center; color:var(--text-light); padding:20px;">暂无申请</p>';
 }
-
 function openAcceptModal(id) {
     const app = state.applications.find(a => a.id === id);
     if (!app) return;
     const months = Object.keys(state.monthData).sort();
-    const opts = months.map(m => `<option value="${m}" ${m === state.currentMonth ? 'selected' : ''}>${state.monthData[m].label}</option>`).join('');
+    let autoMonth = null;
+    for (const m of months) {
+        const md = state.monthData[m];
+        if (app.priority ? md.priorityUsed < md.priorityLimit : md.normalUsed < md.normalLimit) { autoMonth = m; break; }
+    }
+    const opts = months.map(m => {
+        const md = state.monthData[m];
+        const full = app.priority ? md.priorityUsed >= md.priorityLimit : md.normalUsed >= md.normalLimit;
+        return `<option value="${m}" ${m === autoMonth ? 'selected' : ''}>${md.label}${full ? ' (已满)' : ''}${m === autoMonth ? ' ← 推荐' : ''}</option>`;
+    }).join('');
     openModal(`
         <div class="modal-drag-bar"></div>
         <div class="modal-header"><h3>接单：${app.name}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        ${autoMonth ? `<div class="hint" style="display:block;">已自动推荐 ${state.monthData[autoMonth].label}</div>` : ''}
         <div class="form-group"><label>项目名称</label><input id="accept-project" value="${app.desc.slice(0,10)}"></div>
         <div class="form-group"><label>排入月份</label><select id="accept-month">${opts}</select></div>
+        <div class="form-group"><label>是否加急</label>
+            <select id="accept-priority"><option value="false" ${!app.priority?'selected':''}>普通单</option><option value="true" ${app.priority?'selected':''}>⚡ 加急</option></select>
+        </div>
+        <div class="form-group"><label>预估</label>
+            <select id="accept-estimate"><option>上旬</option><option>中旬</option><option>下旬</option></select>
+        </div>
         <button class="btn" onclick="confirmAccept(${id})">确认生成订单</button>
     `);
 }
 async function confirmAccept(id) {
     const app = state.applications.find(a => a.id === id);
-    const project = document.getElementById('accept-project').value;
+    if (!app) return;
+    const project = document.getElementById('accept-project').value || '定制订单';
     const month = document.getElementById('accept-month').value;
-    const { data: newOrder, error } = await sb.from('orders').insert({ user_id: app.raw.user_id, client_name: app.name, contact: app.phone, project_name: project, status: '排队中', schedule_month: month, is_priority: app.priority }).select().single();
-    if (newOrder) {
-        await sb.from('order_nodes').insert(NODE_NAMES.map((name, i) => ({ order_id: newOrder.id, node_index: i, node_name: name })));
-        await sb.from('applications').update({ status: '已接单' }).eq('id', id);
-        showToast('接单成功'); await loadAllData(); renderAdmin(); closeModal();
-    }
+    const priority = document.getElementById('accept-priority').value === 'true';
+    const estimate = document.getElementById('accept-estimate').value;
+    const md = state.monthData[month];
+    if (priority ? md.priorityUsed >= md.priorityLimit : md.normalUsed >= md.normalLimit) return showToast('该月已满');
+    const maxSort = Math.max(0, ...state.orders.filter(o => o.month === month).map(o => o.sortOrder));
+    const { data: newOrder, error } = await sb.from('orders').insert({
+        user_id: app.raw.user_id, client_name: app.name, contact: app.phone,
+        project_name: project, status: '排队中', is_priority: priority,
+        schedule_month: month, sort_order: maxSort + 1, estimated_period: estimate,
+        application_id: app.id, remark_pattern: '', remark_fabric: ''
+    }).select().single();
+    if (error) return showToast('建单失败：' + error.message);
+    // 生成 11 个节点
+    const nodeDescs = ['拆件沟通','版型确认','布料选择','下单确认','面料预缩','打版裁片','缝制拼接','整烫定型','细节装饰','质检包装','寄出/交付'];
+    await sb.from('order_nodes').insert(nodeDescs.map((name, i) => ({
+        order_id: newOrder.id, node_index: i, node_name: name, status: '待开始'
+    })));
+    await sb.from('applications').update({ status: '已接单' }).eq('id', id);
+    closeModal(); showToast(`接单成功，排入 ${state.monthData[month].label}`);
+    await loadAllData();
+    renderAdmin();
 }
-
+function openRejectModal(id) {
+    const app = state.applications.find(a => a.id === id);
+    if (!app) return;
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>拒绝：${app.name}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:15px;">
+            <button class="btn btn-sm btn-ghost" onclick="document.getElementById('reject-reason').value='档期已满'">档期已满</button>
+            <button class="btn btn-sm btn-ghost" onclick="document.getElementById('reject-reason').value='工艺暂不支持'">工艺不支持</button>
+            <button class="btn btn-sm btn-ghost" onclick="document.getElementById('reject-reason').value='预算不匹配'">预算不匹配</button>
+        </div>
+        <div class="form-group"><label>详细说明</label><textarea id="reject-reason"></textarea></div>
+        <button class="btn" style="background:var(--danger);" onclick="confirmReject(${id})">确认拒绝</button>
+    `);
+}
+async function confirmReject(id) {
+    const reason = document.getElementById('reject-reason').value;
+    const { error } = await sb.from('applications').update({ status: '已拒绝', reject_reason: reason }).eq('id', id);
+    if (error) return showToast('操作失败');
+    closeModal(); showToast('已拒绝');
+    await loadApplications(); renderAdmin();
+}
 function renderMake() {
     const months = Object.keys(state.monthData).sort();
-    document.getElementById('make-month-tabs').innerHTML = months.map(m => `<div class="month-pill ${m === state.currentMonth ? 'active' : ''}" onclick="switchMonth('${m}'); renderMake()">${state.monthData[m].label}</div>`).join('');
+    document.getElementById('make-month-tabs').innerHTML = months.map(m =>
+        `<div class="month-pill ${m === state.currentMonth ? 'active' : ''}" onclick="switchMonth('${m}'); renderMake()">${state.monthData[m].label}</div>`
+    ).join('');
     document.getElementById('make-month-title').innerText = (state.monthData[state.currentMonth]?.label || '') + ' 排单';
     const list = state.orders.filter(o => o.month === state.currentMonth).sort((a, b) => {
         const aDone = a.status === '已完成', bDone = b.status === '已完成';
@@ -983,14 +1421,15 @@ function renderMake() {
                 <div style="font-size:12px; color:${o.status === '制作中' ? 'var(--primary)' : '#888'}; margin-top:4px;">${o.project} · ${o.status}</div>
                 <div class="order-ops">
                     <button onclick="event.stopPropagation(); openStatusModal('${o.id}')">状态</button>
+                    <button onclick="event.stopPropagation(); togglePriority('${o.id}')">${o.isPriority ? '取消加急' : '加急'}</button>
+                    <button onclick="event.stopPropagation(); openEstimateModal('${o.id}')">预估</button>
                 </div>
             </div>
             <div class="drag-handle"></div>
         </div>
-    `).join('') || '<p style="text-align:center; padding:20px;">本月暂无订单</p>';
+    `).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px;">本月暂无订单</p>';
     bindDragEvents();
 }
-
 function bindDragEvents() {
     const container = document.getElementById('drag-container');
     if (!container) return;
@@ -1042,10 +1481,13 @@ function getAfterEl(container, y) {
 async function saveOrderFromDOM() {
     const items = [...document.querySelectorAll('#drag-container .order-item')];
     const updates = items.map((el, idx) => ({ id: parseInt(el.dataset.id), sort_order: idx + 1 }));
-    for (const u of updates) { await sb.from('orders').update({ sort_order: u.sort_order }).eq('id', u.id); }
-    showToast('排序已保存'); await loadOrders(); renderMake();
+    for (const u of updates) {
+        await sb.from('orders').update({ sort_order: u.sort_order }).eq('id', u.id);
+    }
+    showToast('排序已保存');
+    await loadOrders();
+    renderMake();
 }
-
 function openStatusModal(id) {
     const o = state.orders.find(x => x.id === id);
     openModal(`
@@ -1060,41 +1502,148 @@ function openStatusModal(id) {
 async function confirmStatus(id) {
     const s = document.getElementById('status-select').value;
     await sb.from('orders').update({ status: s }).eq('id', parseInt(id));
-    closeModal(); showToast('已切换'); await loadOrders(); renderAdmin();
+    closeModal(); showToast('已切换');
+    await loadOrders(); renderAdmin();
+}
+async function togglePriority(id) {
+    const o = state.orders.find(x => x.id === id);
+    await sb.from('orders').update({ is_priority: !o.isPriority }).eq('id', parseInt(id));
+    showToast(o.isPriority ? '已取消加急' : '已设为加急');
+    await loadAllData(); renderAdmin();
+}
+function openEstimateModal(id) {
+    const o = state.orders.find(x => x.id === id);
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>修改预估：${o.no}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="form-group"><label>显示方式</label>
+            <select id="est-type" onchange="document.getElementById('est-date-group').style.display=this.value==='date'?'block':'none'">
+                <option value="period" ${o.estimatedPeriod ? 'selected' : ''}>上中下旬</option>
+                <option value="date" ${o.estimatedDate ? 'selected' : ''}>精确日期</option>
+            </select>
+        </div>
+        <div class="form-group" id="est-period-group"><label>区间</label>
+            <select id="est-period"><option ${o.estimatedPeriod === '上旬' ? 'selected' : ''}>上旬</option><option ${o.estimatedPeriod === '中旬' ? 'selected' : ''}>中旬</option><option ${o.estimatedPeriod === '下旬' ? 'selected' : ''}>下旬</option></select>
+        </div>
+        <div class="form-group" id="est-date-group" style="display:none;"><label>日期</label><input type="date" id="est-date" value="${o.estimatedDate || ''}"></div>
+        <button class="btn" onclick="confirmEstimate('${id}')">保存</button>
+    `);
+}
+async function confirmEstimate(id) {
+    const type = document.getElementById('est-type').value;
+    const updates = {};
+    if (type === 'period') { updates.estimated_period = document.getElementById('est-period').value; updates.estimated_date = null; }
+    else { updates.estimated_date = document.getElementById('est-date').value; updates.estimated_period = null; }
+    await sb.from('orders').update(updates).eq('id', parseInt(id));
+    closeModal(); showToast('已更新');
+    await loadOrders(); renderAdmin();
+}
+let pickerYear, pickerMonth;
+function openMonthPicker() {
+    const cur = state.currentMonth.split('-');
+    pickerYear = parseInt(cur[0]); pickerMonth = parseInt(cur[1]);
+    const yCol = document.getElementById('wheel-year');
+    const mCol = document.getElementById('wheel-month');
+    const nowY = new Date().getFullYear();
+    yCol.innerHTML = Array.from({ length: 5 }, (_, i) => nowY - 1 + i).map(y => `<div class="wheel-item ${y === pickerYear ? 'selected' : ''}" data-v="${y}">${y}年</div>`).join('');
+    mCol.innerHTML = Array.from({ length: 12 }, (_, i) => i + 1).map(m => `<div class="wheel-item ${m === pickerMonth ? 'selected' : ''}" data-v="${m}">${m}月</div>`).join('');
+    yCol.querySelectorAll('.wheel-item').forEach(el => el.onclick = () => {
+        yCol.querySelectorAll('.wheel-item').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected'); pickerYear = parseInt(el.dataset.v);
+    });
+    mCol.querySelectorAll('.wheel-item').forEach(el => el.onclick = () => {
+        mCol.querySelectorAll('.wheel-item').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected'); pickerMonth = parseInt(el.dataset.v);
+    });
+    document.getElementById('month-picker').classList.add('show');
+}
+function closeMonthPicker() { document.getElementById('month-picker').classList.remove('show'); }
+async function confirmMonthPicker() {
+    const key = `${pickerYear}-${String(pickerMonth).padStart(2, '0')}`;
+    if (!state.monthData[key]) {
+        await sb.from('month_settings').upsert({ month: key, normal_limit: 10, priority_limit: 2 });
+        await loadMonths();
+    }
+    state.currentMonth = key;
+    closeMonthPicker();
+    renderAdmin();
+}
+function openCapacityModal() {
+    const md = state.monthData[state.currentMonth];
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>修改 ${md.label} 容量</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="form-group"><label>普通上限</label><input type="number" id="cap-normal" value="${md.normalLimit}"></div>
+        <div class="form-group"><label>加急上限</label><input type="number" id="cap-priority" value="${md.priorityLimit}"></div>
+        <button class="btn" onclick="confirmCapacity()">保存</button>
+    `);
+}
+async function confirmCapacity() {
+    const md = state.monthData[state.currentMonth];
+    await sb.from('month_settings').upsert({
+        month: state.currentMonth,
+        normal_limit: parseInt(document.getElementById('cap-normal').value) || md.normalLimit,
+        priority_limit: parseInt(document.getElementById('cap-priority').value) || md.priorityLimit
+    });
+    closeModal(); showToast('容量已更新');
+    await loadMonths(); renderAdmin();
 }
 
+/* ================= 订单管理（店长） ================= */
 function renderOrderManageList() {
     const kw = (document.getElementById('order-search')?.value || '').trim();
     const sf = document.getElementById('order-status-filter')?.value || '';
+    const unreadOnly = document.getElementById('order-unread-only')?.checked;
     const list = state.orders.filter(o => {
         if (kw && !(o.no.includes(kw) || o.name.includes(kw) || (o.phone || '').includes(kw))) return false;
         if (sf && o.status !== sf) return false;
+        if (unreadOnly && !o.remarkUnread) return false;
         return true;
     });
     document.getElementById('order-manage-list').innerHTML = list.map(o => `
         <div class="order-item" onclick="openOrderDetail('${o.id}')">
+            ${o.remarkUnread ? '<div class="change-tag">需求变更</div>' : ''}
             <div style="flex:1;">
                 <b>${o.no} ${o.name} ${o.isPriority ? '⚡' : ''}</b>
-                <div style="font-size:12px; color:#888; margin-top:4px;">${o.project} · ${o.status}</div>
+                <div style="font-size:12px; color:#888; margin-top:4px;">${o.project} · ${o.status} · ${state.monthData[o.month]?.label || o.month}</div>
+                <div class="order-ops">
+                    <button onclick="event.stopPropagation(); openOrderDetail('${o.id}')">详情</button>
+                    <button onclick="event.stopPropagation(); copyShareLink('${o.id}')">复制专属链接</button>
+                </div>
             </div>
         </div>
-    `).join('') || '<p style="text-align:center; padding:20px;">无匹配</p>';
+    `).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px;">无匹配</p>';
+}
+function copyShareLink(id) {
+    const o = state.orders.find(x => x.id === id);
+    if (!o) return;
+    copyText(`${location.origin}${location.pathname}?t=${o.shareToken}`);
 }
 
-/* ================= 订单详情 (店长) ================= */
+/* ================= 订单详情（店长） ================= */
 function openOrderDetail(id) {
     const o = state.orders.find(x => x.id === id);
     if (!o) return;
-    state.currentOrderDetail = o; state.currentChatNode = Math.min(o.nodeIndex, o.totalNodes - 1);
+    state.currentOrderDetail = o;
+    state.currentChatNode = Math.min(o.nodeIndex, o.totalNodes - 1);
     const tlHtml = renderTimeline(o);
+    const changeAlert = o.remarkUnread ? `
+        <div class="card" style="background:#FFEBEE; border:1px solid var(--danger);">
+            <b style="color:var(--danger);">顾客修改了需求</b>
+            <button class="btn btn-sm" style="background:#fff; color:var(--danger); border:1px solid var(--danger); margin-top:8px;" onclick="acknowledgeChange('${id}')">已知晓，消除红点</button>
+        </div>
+    ` : '';
     openModal(`
         <div class="modal-drag-bar"></div>
         <div class="modal-header"><h3>管理订单：${o.no}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        ${changeAlert}
         <div class="card">
             <h4 style="color:var(--primary); margin-bottom:8px;">🧵 流程管理</h4>
             <div class="timeline">${tlHtml}</div>
             <div class="order-ops" style="margin-top:10px;">
-                ${(o.nodeNames || NODE_NAMES).map((name, i) => `<button onclick="openNodeAction('${id}', ${i})">${i + 1}. ${name.slice(0,4)}</button>`).join('')}
+                ${(o.nodeNames || NODE_NAMES).map((name, i) => `
+                    <button onclick="openNodeAction('${id}', ${i})">${i + 1}. ${name.slice(0,4)}</button>
+                `).join('')}
             </div>
         </div>
         <div class="card" id="chat-card">
@@ -1102,14 +1651,22 @@ function openOrderDetail(id) {
             <div class="node-selector" id="node-selector">${renderAdminNodeTabs(o)}</div>
             <div id="chat-area">${renderAdminChatArea(o)}</div>
         </div>
+        <div class="card">
+            <button class="btn btn-ghost" onclick="copyShareLink('${id}')">📋 复制专属链接</button>
+        </div>
     `);
 }
-function renderAdminNodeTabs(o) { return (o.nodeNames || NODE_NAMES).map((name, i) => `<div class="node-pill ${i === state.currentChatNode ? 'active' : ''}" onclick="switchChatNode('${o.id}', ${i})">${i + 1}. ${name}</div>`).join(''); }
+function renderAdminNodeTabs(o) {
+    return (o.nodeNames || NODE_NAMES).map((name, i) => `
+        <div class="node-pill ${i === state.currentChatNode ? 'active' : ''}" onclick="switchChatNode('${o.id}', ${i})">${i + 1}. ${name}</div>
+    `).join('');
+}
 function renderAdminChatArea(o) {
     const nodeIdx = state.currentChatNode;
     const msgs = state.chat[o.id]?.[nodeIdx] || [];
     const summaryText = state.summary[o.id]?.[nodeIdx] || '';
     const msgHtml = msgs.map((m, i) => {
+        const isNotice = m.role === 'notice' || m.isNotice;
         return `<div class="chat-msg ${m.role}">
             <div class="bubble ${m.role} ${m.highlighted ? 'highlighted' : ''}">${m.text}</div>
             <div class="msg-actions">
@@ -1124,8 +1681,12 @@ function renderAdminChatArea(o) {
             <input id="chat-input" placeholder="回复...">
             <button class="btn btn-sm" style="margin:0;" onclick="sendAdminMsg('${o.id}')">发送</button>
         </div>
+        <button class="btn btn-ghost" style="margin-top:8px;" onclick="sendAdminNotice('${o.id}')">📢 发送通知</button>
         <div class="summary-box">
-            <div class="summary-title"><b>⭐ 交流重点归纳</b><span class="edit-btn" onclick="editSummary('${o.id}', ${nodeIdx})">编辑</span></div>
+            <div class="summary-title">
+                <b>⭐ 交流重点归纳</b>
+                <span class="edit-btn" onclick="editSummary('${o.id}', ${nodeIdx})">编辑</span>
+            </div>
             <div class="summary-content">${summaryText ? summaryText.split('\n').filter(x=>x.trim()).map(x=>`<div class="item">· ${x}</div>`).join('') : '<div class="empty">暂无，点消息「☆ 高亮」自动汇总</div>'}</div>
         </div>
     `;
@@ -1136,6 +1697,7 @@ async function toggleHighlight(orderId, nodeIdx, msgIdx) {
     const m = msgs[msgIdx];
     m.highlighted = !m.highlighted;
     if (m.id) await sb.from('messages').update({ highlighted: m.highlighted }).eq('id', m.id);
+    // 更新 summary
     const cur = (state.summary[orderId]?.[nodeIdx] || '').split('\n').filter(x => x.trim());
     if (m.highlighted) { if (!cur.includes(m.text)) cur.push(m.text); }
     else { const i = cur.indexOf(m.text); if (i >= 0) cur.splice(i, 1); }
@@ -1156,7 +1718,9 @@ async function togglePublishable(orderId, nodeIdx, msgIdx) {
 function editSummary(orderId, nodeIdx) {
     const cur = state.summary[orderId]?.[nodeIdx] || '';
     openModal(`
-        <div class="modal-drag-bar"></div><div class="modal-header"><h3>编辑交流重点</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>编辑交流重点</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <p style="font-size:12px; color:var(--text-light); margin-bottom:10px;">每行一条</p>
         <div class="form-group"><textarea id="summary-edit" style="height:120px;">${cur}</textarea></div>
         <button class="btn" onclick="saveSummary('${orderId}', ${nodeIdx})">保存</button>
     `);
@@ -1166,53 +1730,80 @@ async function saveSummary(orderId, nodeIdx) {
     state.summary[orderId][nodeIdx] = document.getElementById('summary-edit').value;
     await sb.from('orders').update({ summary: state.summary[orderId] }).eq('id', parseInt(orderId));
     closeModal(); showToast('已保存');
+    const o = state.orders.find(x => x.id === orderId);
     setTimeout(() => openOrderDetail(orderId), 100);
+}
+async function acknowledgeChange(id) {
+    await sb.from('orders').update({ remark_unread: false }).eq('id', parseInt(id));
+    await sb.from('remark_logs').update({ acknowledged: true }).eq('order_id', parseInt(id));
+    closeModal(); showToast('已标记');
+    await loadOrders(); renderAdmin();
+}
+function openNodeAction(id, i) {
+    const o = state.orders.find(x => x.id === id);
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>节点操作：${o.nodeNames?.[i] || NODE_NAMES[i]}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="form-group"><label>上传照片</label><div class="upload-box" onclick="showToast('上传功能待接入')">+ 点击上传</div></div>
+        <div class="form-group"><label>配文</label><textarea placeholder="例如：纸样已经裁好..."></textarea></div>
+        <button class="btn" onclick="completeNode('${id}', ${i})">确认完成</button>
+        <button class="btn btn-danger" style="margin-top:8px;" onclick="skipNode('${id}', ${i})">跳过此工序</button>
+    `);
+}
+async function completeNode(id, i) {
+    await sb.from('order_nodes').update({ status: '已完成', done_at: new Date().toISOString() }).eq('order_id', parseInt(id)).eq('node_index', i);
+    // 节点 4（下标 3）完成后自动变制作中
+    if (i === 3) await sb.from('orders').update({ status: '制作中' }).eq('id', parseInt(id));
+    // 最后一个节点完成后变已完成
+    const o = state.orders.find(x => x.id === id);
+    const { data: nodes } = await sb.from('order_nodes').select('status').eq('order_id', parseInt(id));
+    if (nodes?.every(n => n.status === '已完成' || n.status === '已跳过')) {
+        await sb.from('orders').update({ status: '已完成' }).eq('id', parseInt(id));
+        showToast('订单已完成，已归入待上传作品');
+    } else {
+        showToast('节点已完成');
+    }
+    closeModal(); await loadOrders(); renderAdmin();
+    setTimeout(() => openOrderDetail(id), 100);
+}
+async function skipNode(id, i) {
+    await sb.from('order_nodes').update({ status: '已跳过' }).eq('order_id', parseInt(id)).eq('node_index', i);
+    closeModal(); showToast('已跳过');
+    await loadOrders(); renderAdmin();
+    setTimeout(() => openOrderDetail(id), 100);
 }
 async function sendAdminMsg(orderId) {
     const input = document.getElementById('chat-input');
     if (!input?.value.trim()) return;
-    const content = input.value; input.value = '';
-    await sb.from('messages').insert({ order_id: parseInt(orderId), node_index: state.currentChatNode, sender_id: state.user.id, sender_role: 'admin', content });
+    const content = input.value;
+    input.value = '';
+    await sb.from('messages').insert({
+        order_id: parseInt(orderId), node_index: state.currentChatNode,
+        sender_id: state.user.id, sender_role: 'admin', content
+    });
     await buildChatFromOrders();
     const o = state.orders.find(x => x.id === orderId);
     document.getElementById('chat-area').innerHTML = renderAdminChatArea(o);
     const cb = document.getElementById('chat-box'); if (cb) cb.scrollTop = cb.scrollHeight;
 }
-
-function openNodeAction(id, i) {
-    const o = state.orders.find(x => x.id === id);
+function sendAdminNotice(orderId) {
     openModal(`
-        <div class="modal-drag-bar"></div><div class="modal-header"><h3>节点操作：${o.nodeNames?.[i] || NODE_NAMES[i]}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
-        <div class="form-group"><label>上传照片 (可多选)</label><input type="file" id="node-photos" accept="image/*" multiple style="padding:10px; border:1px dashed var(--pink);"></div>
-        <div class="form-group"><label>配文</label><textarea id="node-desc" placeholder="例如：纸样已经裁好..."></textarea></div>
-        <button class="btn" onclick="uploadNodePhotos('${id}', ${i})">保存并完成节点</button>
-        <button class="btn btn-danger" style="margin-top:8px;" onclick="skipNode('${id}', ${i})">跳过此工序</button>
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>发送通知</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="form-group"><textarea id="notice-text" placeholder="例如：面料已到货，下周开工"></textarea></div>
+        <button class="btn" onclick="confirmNotice('${orderId}')">发送</button>
     `);
 }
-async function uploadNodePhotos(id, i) {
-    const fileInput = document.getElementById('node-photos');
-    const desc = document.getElementById('node-desc').value;
-    const files = fileInput.files;
-    if (files.length === 0 && !desc) return showToast('请至少上传一张照片或填写配文');
-    showToast('正在上传...');
-    let photoUrls = [];
-    for (const file of files) {
-        const ext = file.name.split('.').pop();
-        const path = `node_${id}_${i}_${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-        const { data, error } = await sb.storage.from('order-images').upload(path, file);
-        if (!error) { const { data: { publicUrl } } = sb.storage.from('order-images').getPublicUrl(path); photoUrls.push({ url: publicUrl, caption: desc }); }
-    }
-    const updates = { status: '已完成', done_at: new Date().toISOString() };
-    if (photoUrls.length > 0) updates.photos = photoUrls;
-    await sb.from('order_nodes').update(updates).eq('order_id', parseInt(id)).eq('node_index', i);
-    if (i === 3) await sb.from('orders').update({ status: '制作中' }).eq('id', parseInt(id));
-    const { data: nodes } = await sb.from('order_nodes').select('status').eq('order_id', parseInt(id));
-    if (nodes?.every(n => n.status === '已完成' || n.status === '已跳过')) await sb.from('orders').update({ status: '已完成' }).eq('id', parseInt(id));
-    closeModal(); showToast('节点完成'); await loadOrders(); renderAdmin(); setTimeout(() => openOrderDetail(id), 100);
-}
-async function skipNode(id, i) {
-    await sb.from('order_nodes').update({ status: '已跳过' }).eq('order_id', parseInt(id)).eq('node_index', i);
-    closeModal(); showToast('已跳过'); await loadOrders(); renderAdmin(); setTimeout(() => openOrderDetail(id), 100);
+async function confirmNotice(orderId) {
+    const t = document.getElementById('notice-text').value;
+    if (!t) return showToast('请输入');
+    await sb.from('messages').insert({
+        order_id: parseInt(orderId), node_index: state.currentChatNode,
+        sender_id: state.user.id, sender_role: 'admin', content: t, is_notice: true
+    });
+    closeModal(); showToast('已发送');
+    await buildChatFromOrders();
+    setTimeout(() => openOrderDetail(orderId), 100);
 }
 
 /* ================= 作品管理 ================= */
@@ -1221,37 +1812,213 @@ function renderWorks() {
     document.getElementById('pending-works-area').innerHTML = pending.length ? `
         <div class="card" style="background:#fff8e6;">
             <h4 style="color:#b07a2a; margin-bottom:10px;">📦 已完成订单（${pending.length}）</h4>
-            ${pending.map(o => `<div class="pending-work"><div><b>${o.no} ${o.project}</b></div><button class="btn btn-sm" onclick="uploadWorkFromOrder('${o.id}')">一键上传</button></div>`).join('')}
+            ${pending.map(o => `
+                <div class="pending-work">
+                    <div>
+                        <b>${o.no} ${o.project}</b>
+                        <div style="font-size:11px; color:var(--text-light); margin-top:3px;">${o.name}</div>
+                    </div>
+                    <button class="btn btn-sm" style="margin:0;" onclick="uploadWorkFromOrder('${o.id}')">一键上传</button>
+                </div>
+            `).join('')}
         </div>
     ` : '';
     document.getElementById('works-list').innerHTML = state.works.map(w => `
-        <div class="card" style="display:flex; justify-content:space-between;">
-            <div><b>${w.title}</b><div style="font-size:12px; color:#888;">${w.category || ''}</div></div>
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <div onclick="openEditWorkModal('${w.id}')" style="flex:1; cursor:pointer; display:flex; gap:10px;">
+                <img src="${w.cover}" style="width:60px; height:80px; object-fit:cover; border-radius:6px;">
+                <div>
+                    <b style="font-size:14px;">${w.title}</b>
+                    <div style="font-size:12px; color:#888; margin-top:4px;">${w.category || '未分类'} · ${w.status} ${w.pinned ? '· 精选' : ''} ${w.process ? '· 含流程' : ''}</div>
+                </div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+                <button class="btn btn-sm btn-ghost" onclick="togglePin('${w.id}')">${w.pinned ? '取消置顶' : '置顶'}</button>
+            </div>
         </div>
-    `).join('');
+    `).join('') + `<button class="btn" onclick="openEditWorkModal('new')">+ 发布新作品</button>`;
 }
 function uploadWorkFromOrder(id) {
     const o = state.orders.find(x => x.id === id);
+    if (!o) return;
     openModal(`
-        <div class="modal-drag-bar"></div><div class="modal-header"><h3>一键上传作品</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
-        <div class="form-group"><label>作品标题</label><input id="gen-title" value="${o.project}"></div>
-        <div class="form-group"><label>封面图 URL</label><input id="gen-cover" placeholder="https://..."></div>
-        <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"><input type="checkbox" id="gen-show-process" checked style="transform:scale(1.3);"><b>公开流程回顾与精选对话</b></label>
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>一键上传作品</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="card">
+            <p style="font-size:13px; color:#555; margin-bottom:15px;">订单 ${o.no} · ${o.project}</p>
+            <div class="form-group"><label>作品标题</label><input id="gen-title" value="${o.project}"></div>
+            <div class="form-group"><label>分类</label>
+                <select id="gen-cat">${['连衣裙','衬衫','外套','其他'].map(c => `<option>${c}</option>`).join('')}</select>
+            </div>
+            <div class="form-group"><label>描述</label><textarea id="gen-desc">由订单 ${o.no} 自动生成</textarea></div>
+            <div class="form-group"><label>封面图 URL</label><input id="gen-cover" placeholder="https://..."></div>
+        </div>
+        <div class="card" style="background:#f8f5fa;">
+            <h4 style="color:var(--primary); margin-bottom:10px;">📸 制作过程</h4>
+            <label style="display:flex; align-items:center; gap:10px; padding:10px; background:#fff; border-radius:8px; margin-bottom:8px;">
+                <input type="checkbox" id="gen-show-process" checked style="transform:scale(1.3);">
+                <div style="flex:1;"><b style="font-size:13px;">公开流程回顾</b></div>
+            </label>
+            <label style="display:flex; align-items:center; gap:10px; padding:10px; background:#fff; border-radius:8px;">
+                <input type="checkbox" id="gen-show-chat" checked style="transform:scale(1.3);">
+                <div style="flex:1;"><b style="font-size:13px;">公开精选对话 + 交流重点</b></div>
+            </label>
+        </div>
         <button class="btn" onclick="confirmUploadWork('${id}')">确认上传</button>
     `);
 }
 async function confirmUploadWork(id) {
     const o = state.orders.find(x => x.id === id);
     const title = document.getElementById('gen-title').value;
+    const cat = document.getElementById('gen-cat').value;
+    const desc = document.getElementById('gen-desc').value;
     const cover = document.getElementById('gen-cover').value || 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400';
     const showProcess = document.getElementById('gen-show-process').checked;
+    const showChat = document.getElementById('gen-show-chat').checked;
     let process = null;
     if (showProcess) {
         const names = o.nodeNames || NODE_NAMES;
-        process = { nodes: names.map((name, i) => ({ name, status: o.skipped.includes(i) ? '已跳过' : (i < o.nodeIndex ? '已完成' : '待开始'), photos: o.nodePhotos?.[i] || [], summary: state.summary[o.id]?.[i] || null })) };
+        const nodes = names.map((name, i) => {
+            const msgs = (state.chat[o.id]?.[i] || []);
+            return {
+                name,
+                status: o.skipped.includes(i) ? '已跳过' : (i < o.nodeIndex ? '已完成' : '待开始'),
+                doneAt: '',
+                photos: o.nodePhotos?.[i] || [],
+                summary: state.summary[o.id]?.[i] || null,
+                publicChat: showChat ? msgs.filter(m => m.publishable).map(m => ({ role: m.role, text: m.text })) : []
+            };
+        });
+        process = { nodes };
     }
-    await sb.from('portfolios').insert({ title, category: '其他', cover_image: cover, process, order_id: parseInt(id) });
-    closeModal(); showToast('作品已上传'); await loadWorks(); renderAdmin();
+    const { error } = await sb.from('portfolios').insert({
+        title, category: cat, description: desc, cover_image: cover,
+        detail_images: [], process, order_id: parseInt(id), is_pinned: false
+    });
+    if (error) return showToast('上传失败：' + error.message);
+    closeModal(); showToast('作品已上传');
+    await loadWorks(); renderAdmin();
+}
+async function togglePin(id) {
+    const w = state.works.find(x => String(x.id) === String(id));
+    await sb.from('portfolios').update({ is_pinned: !w.pinned }).eq('id', parseInt(id));
+    showToast(w.pinned ? '已取消置顶' : '已置顶');
+    await loadWorks(); renderWorks();
+}
+function openEditWorkModal(id) {
+    const isNew = id === 'new';
+    const w = isNew ? { title: '', category: '连衣裙', desc: '', cover: '', images: [], process: null } : state.works.find(x => String(x.id) === String(id));
+    if (!w) return;
+    openModal(`
+        <div class="modal-drag-bar"></div>
+        <div class="modal-header"><h3>${isNew ? '发布新作品' : '编辑作品'}</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="form-group"><label>名称</label><input id="work-title" value="${w.title}"></div>
+        <div class="form-group"><label>分类</label>
+            <select id="work-cat">${['连衣裙','衬衫','外套','其他'].map(c => `<option ${w.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select>
+        </div>
+        <div class="form-group"><label>描述</label><textarea id="work-desc">${w.desc || ''}</textarea></div>
+        <div class="form-group"><label>封面图 URL</label><input id="work-cover" value="${w.cover || ''}"></div>
+        <button class="btn" onclick="saveWork('${id}')">保存</button>
+        ${!isNew ? `<button class="btn btn-danger" style="margin-top:8px;" onclick="deleteWork('${id}')">删除</button>` : ''}
+    `);
+}
+async function saveWork(id) {
+    const title = document.getElementById('work-title').value;
+    if (!title) return showToast('请填写名称');
+    const data = {
+        title, category: document.getElementById('work-cat').value,
+        description: document.getElementById('work-desc').value,
+        cover_image: document.getElementById('work-cover').value
+    };
+    if (id === 'new') {
+        await sb.from('portfolios').insert(data);
+    } else {
+        await sb.from('portfolios').update(data).eq('id', parseInt(id));
+    }
+    closeModal(); showToast('已保存');
+    await loadWorks(); renderWorks();
+}
+async function deleteWork(id) {
+    await sb.from('portfolios').delete().eq('id', parseInt(id));
+    closeModal(); showToast('已删除');
+    await loadWorks(); renderWorks();
+}
+
+/* ================= 相册 ================= */
+function openAlbum(list, idx) {
+    state.album.list = list; state.album.idx = idx;
+    document.getElementById('album-drawer').classList.add('show');
+    renderAlbum();
+}
+function renderAlbum() {
+    const item = state.album.list[state.album.idx];
+    if (!item) return;
+    document.getElementById('album-img').src = item.url;
+    document.getElementById('album-caption').innerText = item.caption || '';
+    document.getElementById('album-title').innerText = `${state.album.idx + 1} / ${state.album.list.length}`;
+}
+function albumPrev() { if (state.album.idx > 0) { state.album.idx--; renderAlbum(); } }
+function albumNext() { if (state.album.idx < state.album.list.length - 1) { state.album.idx++; renderAlbum(); } }
+function closeAlbum() { document.getElementById('album-drawer').classList.remove('show'); }
+
+/* ================= Realtime ================= */
+function setupRealtime() {
+    if (state.realtimeChannel) sb.removeChannel(state.realtimeChannel);
+    state.realtimeChannel = sb.channel('messages-changes')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+            const m = payload.new;
+            if (!state.chat[m.order_id]) state.chat[m.order_id] = {};
+            if (!state.chat[m.order_id][m.node_index]) state.chat[m.order_id][m.node_index] = [];
+            state.chat[m.order_id][m.node_index].push({
+                id: m.id, role: m.sender_role, text: m.content || '',
+                highlighted: m.highlighted, publishable: m.publishable
+            });
+            // 如果正在看这个订单，刷新聊天区
+            if (state.currentOrderDetail && String(state.currentOrderDetail.id) === String(m.order_id)) {
+                const o = state.orders.find(x => String(x.id) === String(m.order_id));
+                if (o && document.getElementById('chat-area')) {
+                    document.getElementById('chat-area').innerHTML = renderAdminChatArea(o);
+                }
+            }
+        })
+        .subscribe();
+}
+
+/* ================= 专属链接只读 ================= */
+async function loadShareOrder(token) {
+    const { data, error } = await sb.from('orders').select('*').eq('share_token', token).single();
+    if (error || !data) {
+        showToast('链接无效');
+        showLoginPage();
+        return;
+    }
+    // 加载节点 + 消息
+    const { data: nodes } = await sb.from('order_nodes').select('*').eq('order_id', data.id).order('node_index');
+    const { data: msgs } = await sb.from('messages').select('*').eq('order_id', data.id).order('created_at');
+    const nodeMap = {};
+    (msgs || []).forEach(m => { (nodeMap[m.node_index] = nodeMap[m.node_index] || []).push(m); });
+    document.getElementById('share-page').style.display = 'block';
+    document.getElementById('share-content').innerHTML = `
+        <div class="card">
+            <h3 style="color:var(--primary);">${data.project_name}</h3>
+            <p style="font-size:12px; color:var(--text-light); margin-top:6px;">${data.order_no} · ${data.status}</p>
+        </div>
+        <div class="card">
+            <h4 style="color:var(--primary); margin-bottom:8px;">定制流程</h4>
+            <div class="timeline">
+                ${(nodes || []).map((n, i) => `
+                    <div class="tl-item ${n.status === '已完成' ? 'done' : n.status === '已跳过' ? 'skip' : (i === (nodes.findIndex(x => x.status === '待开始')) ? 'current' : '')}">
+                        <div class="tl-name">${i+1}. ${n.node_name} ${n.status === '已跳过' ? '(本单无)' : ''}</div>
+                        ${n.photos?.length ? `<div>${n.photos.map(p => `<img class="tl-photo" src="${p.url}">`).join('')}</div>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        <div class="card">
+            <p style="font-size:13px; color:var(--text-light); text-align:center;">登录后可绑定到自己的账号</p>
+            <button class="btn" onclick="location.href='${location.pathname}'">去登录 / 绑定</button>
+        </div>
+    `;
 }
 
 /* ================= 初始化 ================= */
