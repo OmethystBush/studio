@@ -8,7 +8,6 @@
 :root {
     --primary: #746097; --primary2: #AD86AE; --pink: #ECD9ED; --cream: #EADACB;
     --bg: #FBF8FB; --text: #333; --text-light: #888; --gray: #B5B0BA; --danger: #F44336;
-    --highlight: #FFF3C4; --highlight-border: #E0B400;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, "PingFang SC", sans-serif; }
 body { background: var(--bg); color: var(--text); padding-bottom: calc(70px + env(safe-area-inset-bottom)); -webkit-tap-highlight-color: transparent; }
@@ -20,7 +19,6 @@ body { background: var(--bg); color: var(--text); padding-bottom: calc(70px + en
 .nav-item { position: relative; display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-light); cursor: pointer; padding: 5px 10px; border-radius: 14px; flex: 1; max-width: 80px;}
 .nav-item.active { color: var(--primary); font-weight: bold; background: rgba(116,96,151,.12); }
 .nav-item svg { width: 22px; height: 22px; margin-bottom: 3px; fill: currentColor; }
-.nav-dot { position: absolute; top: 2px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); display: none; }
 
 .page { display: none; padding: 15px; animation: fadeIn .2s; }
 .page.active { display: block; }
@@ -41,11 +39,6 @@ body { background: var(--bg); color: var(--text); padding-bottom: calc(70px + en
 .form-group textarea { resize: vertical; height: 80px; }
 .form-group input:disabled { background: #f5f5f5; color: var(--text-light); }
 .upload-box { border: 2px dashed var(--primary2); border-radius: 8px; padding: 15px; text-align: center; color: var(--primary); cursor: pointer; font-size: 13px; background: var(--bg); }
-details { border: 1px solid var(--pink); border-radius: 8px; padding: 12px; background: #fff; margin-bottom: 15px;}
-summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: pointer; outline: none; display: flex; justify-content: space-between; }
-.size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-.size-field label { display: block; font-size: 12px; color: var(--text-light); font-weight: normal; margin-bottom: 4px; }
-.size-field input { width: 100%; padding: 10px; border: 1px solid var(--pink); border-radius: 8px; font-size: 14px; background: #fff; outline: none; }
 .check-row { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--pink); padding: 12px; border-radius: 8px; margin-bottom: 15px; }
 .check-row input { transform: scale(1.3); }
 .hint { font-size: 12px; color: #b07a2a; background: #fff8e6; border-radius: 6px; padding: 8px 10px; margin-bottom: 15px; display: none; }
@@ -65,21 +58,11 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 .pf-info { padding: 8px 10px; }
 .pf-name { font-size: 13px; color: var(--primary); font-weight: bold; }
 .pf-pin { position: absolute; top: 6px; left: 6px; background: linear-gradient(135deg, #FFD700, #FFA500); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 8px; }
-.gallery-tabs { display: flex; gap: 10px; margin-top: 15px; border-bottom: 1px solid var(--pink); padding-bottom: 5px; }
-.g-tab { font-size: 14px; color: var(--text-light); cursor: pointer; padding-bottom: 5px;}
-.g-tab.active { color: var(--primary); font-weight: bold; border-bottom: 2px solid var(--primary); }
-.gallery-content { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
-.gallery-content img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; cursor: pointer; }
 
-.self-tip { background: var(--cream); border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-bottom: 12px; color: #6b5b3e; }
 .month-tabs { display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; }
 .month-pill { padding: 6px 14px; border-radius: 20px; background: #fff; border: 1px solid var(--pink); font-size: 13px; color: var(--text-light); white-space: nowrap; cursor: pointer; }
 .month-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: bold; }
 .month-head { background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
-.cap-line { font-size: 12px; color: var(--text-light); display: flex; justify-content: space-between; margin-bottom: 3px; }
-.cap-bg { height: 6px; background: var(--pink); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
-.cap-fill { height: 100%; background: var(--primary); transition: width .3s; }
-.cap-fill.full { background: var(--primary2); }
 
 .order-card { position: relative; border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 3px solid transparent; cursor: pointer; }
 .order-card.bg-purple { background: linear-gradient(135deg, var(--primary), var(--primary2)); color: #fff; }
@@ -87,16 +70,10 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 .order-card.done { background: #efedf1; border-left-color: var(--gray); opacity: 0.6; }
 .order-card.mine.done { opacity: 0.6; border-left-color: var(--gray); background: #efedf1; }
 .mine-badge { position: absolute; top: 0; right: 0; background: var(--primary); color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 0 10px 0 8px; }
-.order-card.mine.done .mine-badge { background: var(--gray); }
 .oc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12px; }
 .oc-badge { padding: 1px 8px; border-radius: 10px; background: rgba(255,255,255,.25); }
 .oc-priority { background: var(--danger); color: #fff; padding: 1px 6px; border-radius: 6px; margin-left: 4px; font-size: 11px;}
 .oc-title { font-size: 15px; font-weight: bold; }
-.oc-dots { display: flex; gap: 3px; margin-top: 8px; align-items: center; font-size: 11px; }
-.oc-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(116,96,151,.2); }
-.oc-dot.on { background: var(--primary); }
-.order-card.bg-purple .oc-dot { background: rgba(255,255,255,.4); }
-.order-card.bg-purple .oc-dot.on { background: #fff; }
 
 .timeline { position: relative; padding-left: 22px; margin-top: 8px; }
 .timeline::before { content: ''; position: absolute; left: 5px; top: 6px; bottom: 6px; width: 2px; background: var(--pink); }
@@ -109,111 +86,22 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 .tl-name { font-size: 14px; color: #888; }
 .tl-item.done .tl-name { color: var(--primary); font-weight: bold; }
 .tl-item.current .tl-name { color: var(--primary2); font-weight: bold; }
-.tl-item.skip .tl-name { text-decoration: line-through; color: #bbb; }
-.tl-meta { font-size: 11px; color: var(--text-light); margin-top: 2px; }
-.tl-photo { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; margin-top: 6px; margin-right: 6px; cursor: pointer; border: 1px solid var(--pink); }
-
-.remark-box { background: var(--bg); border-radius: 8px; padding: 10px; margin-top: 10px; }
-.remark-item { font-size: 13px; color: var(--text); margin-bottom: 6px; }
-.remark-item span { color: var(--text-light); }
-.lock-tip { font-size: 12px; color: var(--danger); margin-top: 8px; }
-
-.mat-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--pink); }
-.mat-imgs { display: flex; gap: 6px; margin-right: 10px; }
-.mat-imgs img { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--pink); cursor: pointer; }
-.mat-imgs .tag { font-size: 9px; color: var(--text-light); text-align: center; }
-.mat-info { flex: 1; }
-.mat-name { font-size: 13px; font-weight: bold; }
-.mat-spec { font-size: 11px; color: var(--text-light); }
-.mat-status { font-size: 11px; padding: 1px 6px; border-radius: 6px; }
-.mat-status.wait { background: #fff8e6; color: #b07a2a; }
-.mat-status.ship { background: #e6f0ff; color: #2a6bb0; }
-.mat-status.arrive { background: #e6f8e6; color: #2a8b3a; }
-.mat-total { display: flex; justify-content: space-between; font-weight: bold; color: var(--primary); margin-top: 10px; font-size: 14px; }
-
-.node-selector { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; margin-bottom: 8px; border-bottom: 1px solid var(--pink); }
-.node-pill { padding: 5px 10px; border-radius: 14px; background: #fff; border: 1px solid var(--pink); font-size: 11px; color: var(--text-light); white-space: nowrap; cursor: pointer; position: relative; }
-.node-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: bold; }
-.node-pill .badge { position: absolute; top: -4px; right: -4px; background: var(--danger); color: #fff; font-size: 9px; padding: 0 4px; border-radius: 6px; }
 
 .chat-box { height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 10px 5px; background: var(--bg); border-radius: 8px; border: 1px solid var(--pink); }
 .chat-msg { display: flex; flex-direction: column; max-width: 85%; position: relative; }
 .chat-msg.admin { align-self: flex-end; align-items: flex-end; }
 .chat-msg.customer { align-self: flex-start; align-items: flex-start; }
-.chat-msg.notice { align-self: stretch; max-width: 100%; }
-.bubble { padding: 9px 13px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-break: break-word; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.bubble { padding: 9px 13px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-break: break-word; }
 .bubble.admin { background: var(--primary); color: #fff; border-bottom-right-radius: 2px; }
 .bubble.customer { background: var(--cream); color: var(--text); border-bottom-left-radius: 2px; }
-.bubble.notice { background: var(--pink); color: var(--primary); font-weight: bold; border-radius: 6px; text-align: center; font-size: 12px; }
-.bubble.highlighted { box-shadow: 0 0 0 2px var(--highlight-border); background: var(--highlight) !important; color: var(--text) !important; }
-.bubble img { max-width: 100%; border-radius: 6px; margin-top: 5px; display: block; cursor: pointer; }
-.msg-actions { display: flex; gap: 8px; margin-top: 4px; font-size: 11px; }
-.msg-actions span { color: var(--text-light); cursor: pointer; padding: 2px 4px; border-radius: 4px; }
-.msg-actions span:hover { background: var(--pink); }
-.msg-actions span.on { color: var(--highlight-border); font-weight: bold; }
 .chat-input { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
 .chat-input input { flex: 1; padding: 10px 15px; border: 1px solid var(--pink); border-radius: 20px; font-size: 14px; outline: none; background: #fff;}
-.btn-upload { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); border: 1px solid var(--pink); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; flex: 0 0 auto; }
-
-.summary-box { background: linear-gradient(135deg, #FFF9E6, #FFF3C4); border: 1px solid var(--highlight-border); border-radius: 10px; padding: 12px; margin-top: 10px; }
-.summary-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.summary-title b { font-size: 13px; color: #8a6d00; }
-.summary-title .edit-btn { font-size: 11px; color: var(--primary); cursor: pointer; }
-.summary-content { font-size: 12px; color: #6b5b3e; line-height: 1.6; white-space: pre-wrap; }
-.summary-content .item { padding: 4px 0; border-bottom: 1px dashed rgba(224,180,0,.3); }
-.summary-content .item:last-child { border-bottom: none; }
-.summary-content .empty { color: var(--text-light); font-style: italic; }
-
-.dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-.dash-card { background: #fff; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.05); cursor: pointer; transition: .1s; position: relative;}
-.dash-card:active { transform: scale(0.95); }
-.dash-num { font-size: 20px; font-weight: bold; color: var(--primary); }
-.dash-num.red { color: var(--danger); }
-.dash-label { font-size: 11px; color: var(--text-light); margin-top: 4px; }
-.dash-card .dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
 
 .admin-tab { display: flex; background: #fff; border-radius: 10px; padding: 4px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(116,96,151,.06); overflow-x: auto; }
 .admin-tab div { flex: 1; text-align: center; padding: 8px; font-size: 13px; border-radius: 8px; color: var(--text-light); cursor: pointer; white-space: nowrap; }
 .admin-tab div.active { background: var(--primary); color: #fff; font-weight: bold; }
 .admin-sec { display: none; }
 .admin-sec.active { display: block; }
-
-.order-item { background: #fff; border-radius: 10px; padding: 12px; margin-bottom: 10px; border-left: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; transition: transform 0.2s, box-shadow 0.2s; position: relative; touch-action: pan-y; }
-.order-item.bg-purple { background: linear-gradient(135deg, #f5f0f8, #e6ddec); }
-.order-item.bg-yellow { background: var(--cream); border-left-color: #D4BEA5; }
-.order-item.dragging { opacity: 0.5; transform: scale(0.98); box-shadow: 0 8px 20px rgba(0,0,0,0.15); z-index: 10; }
-.order-item.longpress-active { background: var(--pink) !important; }
-.order-item .unread-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
-.order-item .change-tag { position: absolute; top: 8px; right: 8px; background: var(--danger); color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 6px; }
-.drag-handle { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #ccc; cursor: grab; touch-action: none; }
-.drag-handle::after { content: '≡'; font-size: 24px; }
-.order-ops { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-.order-ops button { font-size: 11px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--pink); background: #fff; color: var(--primary); cursor: pointer; }
-.order-ops button:active { background: var(--pink); }
-
-.apply-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-.apply-tabs div { flex: 1; text-align: center; padding: 8px; font-size: 13px; border-radius: 8px; background: #fff; border: 1px solid var(--pink); color: var(--text-light); cursor: pointer; }
-.apply-tabs div.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: bold; }
-
-.apply-status { font-size: 12px; padding: 2px 8px; border-radius: 8px; }
-.apply-status.pending { background: #fff8e6; color: #b07a2a; }
-.apply-status.accepted { background: #e6f8e6; color: #2a8b3a; }
-.apply-status.rejected { background: #ffe6e6; color: var(--danger); }
-.reject-reason { font-size: 12px; color: var(--danger); margin-top: 6px; background: #fff5f5; padding: 8px; border-radius: 6px; }
-
-.picker-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 250; display: none; align-items: flex-end; justify-content: center; }
-.picker-overlay.show { display: flex; }
-.picker-sheet { background: #fff; width: 100%; max-width: 640px; border-radius: 20px 20px 0 0; padding: 15px 20px calc(20px + env(safe-area-inset-bottom)); animation: slideUp .25s; }
-@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-.picker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.picker-header .cancel { color: var(--text-light); font-size: 14px; cursor: pointer; }
-.picker-header .confirm { color: var(--primary); font-size: 14px; font-weight: bold; cursor: pointer; }
-.picker-header h4 { color: var(--primary); font-size: 16px; }
-.picker-wheel { display: flex; gap: 10px; height: 200px; }
-.wheel-col { flex: 1; overflow-y: auto; scroll-snap-type: y mandatory; border-radius: 10px; background: var(--bg); padding: 80px 0; position: relative; }
-.wheel-col::-webkit-scrollbar { display: none; }
-.wheel-item { height: 40px; line-height: 40px; text-align: center; font-size: 16px; color: var(--text-light); scroll-snap-align: center; cursor: pointer; }
-.wheel-item.selected { color: var(--primary); font-weight: bold; font-size: 18px; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
 .modal-overlay.show { display: flex; }
@@ -223,136 +111,76 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
 .modal-close { font-size: 20px; color: #aaa; cursor: pointer; }
 .modal-drag-bar { width: 40px; height: 4px; background: var(--pink); border-radius: 2px; margin: 0 auto 12px; }
 
-.album-drawer { position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 300; display: none; flex-direction: column; }
-.album-drawer.show { display: flex; }
-.album-header { padding: 15px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
-.album-body { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-.album-body img { max-width: 90%; max-height: 100%; object-fit: contain; }
-.album-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: rgba(255,255,255,.2); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; }
-.album-nav.left { left: 10px; } .album-nav.right { right: 10px; }
-.album-caption { color: #fff; text-align: center; padding: 15px; font-size: 13px; }
-
 #toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(116,96,151,.95); color: #fff; padding: 12px 24px; border-radius: 20px; font-size: 13px; z-index: 999; display: none; text-align: center; max-width: 80%; }
 </style>
 </head>
 <body>
 
-<!-- 加载页 -->
 <div id="loading" class="loading">
     <div class="spinner"></div>
     <div style="color: var(--primary); font-size: 14px;">加载中…</div>
 </div>
 
-<!-- 主应用（登录后才显示） -->
 <div id="app" style="display:none;">
-
-    <!-- 成品展示 -->
     <div id="page-portfolio" class="page active">
         <div class="page-title">成品展示 ✨</div>
         <div class="filter-bar" id="portfolio-filters"></div>
         <div class="pf-grid" id="portfolio-container"></div>
     </div>
 
-    <!-- 排单 -->
     <div id="page-queue" class="page">
         <div class="page-title">排单进度</div>
-        <div class="self-tip" id="self-tip" style="display:none;"></div>
         <div class="month-tabs" id="month-tabs"></div>
         <div class="month-head" id="month-head"></div>
         <div id="queue-container"></div>
     </div>
 
-    <!-- 申请 -->
     <div id="page-apply" class="page">
         <div class="page-title">申请定制 ✉️</div>
         <div class="card" id="apply-form-area">
             <form onsubmit="submitApply(event)">
                 <div class="form-group"><label>您的称呼 *</label><input type="text" id="apply-name" required></div>
-                <div class="form-group"><label>联系方式 *</label><input type="text" id="apply-contact" placeholder="手机号 / 微信号" required></div>
-                <div class="form-group"><label>想做什么 *</label><textarea id="apply-desc" required placeholder="款式、用途、穿着场合…"></textarea></div>
+                <div class="form-group"><label>联系方式 *</label><input type="text" id="apply-contact" required></div>
+                <div class="form-group"><label>想做什么 *</label><textarea id="apply-desc" required placeholder="款式、用途…"></textarea></div>
                 <div class="form-group"><label>预算范围 *</label>
-                    <select id="apply-budget">
-                        <option>500 以下</option><option>500-1000</option><option>1000-2000</option><option>2000+</option><option>不确定，想先聊聊</option>
-                    </select>
+                    <select id="apply-budget"><option>500 以下</option><option>500-1000</option><option>1000-2000</option><option>2000+</option><option>不确定</option></select>
                 </div>
-                <div class="check-row">
-                    <label style="margin:0;">申请加急 ⚡</label>
-                    <input type="checkbox" id="apply-priority" onchange="document.getElementById('priority-hint').style.display = this.checked ? 'block' : 'none'">
-                </div>
-                <div class="hint" id="priority-hint">加急位名额有限，可能产生加急费，店长确认后告知</div>
-                <div class="form-group">
-                    <label>参考图（每栏最多 6 张）</label>
-                    <div style="display:flex; gap:8px;">
-                        <div style="flex:1;"><div class="upload-box" onclick="document.getElementById('up-sketch').click()">+ 设计草图</div><input type="file" id="up-sketch" accept="image/*" multiple hidden onchange="addImages('sketch', this)"><div class="img-row" id="row-sketch"></div></div>
-                        <div style="flex:1;"><div class="upload-box" onclick="document.getElementById('up-style').click()">+ 风格参考</div><input type="file" id="up-style" accept="image/*" multiple hidden onchange="addImages('style', this)"><div class="img-row" id="row-style"></div></div>
-                        <div style="flex:1;"><div class="upload-box" onclick="document.getElementById('up-detail').click()">+ 细节参考</div><input type="file" id="up-detail" accept="image/*" multiple hidden onchange="addImages('detail', this)"><div class="img-row" id="row-detail"></div></div>
-                    </div>
-                </div>
+                <div class="check-row"><label>申请加急 ⚡</label><input type="checkbox" id="apply-priority" onchange="document.getElementById('priority-hint').style.display = this.checked ? 'block' : 'none'"></div>
+                <div class="hint" id="priority-hint">加急位名额有限，可能产生加急费</div>
                 <button type="submit" class="btn" id="apply-submit-btn">提交申请</button>
             </form>
         </div>
         <div id="apply-success-area" class="card" style="display:none; text-align:center; padding:40px;">
             <h2 style="color:var(--primary); font-size:40px;">✅</h2>
             <h3 style="color:var(--primary); margin:15px 0;">申请已提交</h3>
-            <p style="font-size:13px; color:var(--text-light); margin-bottom:15px;">工作室会在 1-3 天内确认</p>
             <button class="btn" onclick="switchTab('my-orders')">查看我的申请</button>
         </div>
     </div>
 
-    <!-- 我的订单 -->
     <div id="page-my-orders" class="page">
         <div class="page-title">我的订单</div>
-        <div id="my-apply-list"></div>
         <div id="my-order-list"></div>
         <div id="order-detail-view" style="display:none;"></div>
     </div>
 
-    <!-- 账户 -->
     <div id="page-account" class="page">
         <div class="page-title">我的账户</div>
         <div id="account-content"></div>
     </div>
 
-    <!-- 店长后台 -->
     <div id="page-admin" class="page">
         <div class="page-title">店长工作台 ⚙️</div>
-        <div class="dash-grid" id="dash-grid"></div>
         <div class="admin-tab">
-            <div id="tab-review" class="active" onclick="switchAdminTab('review')">申请审核</div>
-            <div id="tab-make" onclick="switchAdminTab('make')">排单管理</div>
-            <div id="tab-orders" onclick="switchAdminTab('orders')">订单管理</div>
+            <div id="tab-review" class="active" onclick="switchAdminTab('review')">审核</div>
+            <div id="tab-orders" onclick="switchAdminTab('orders')">订单</div>
         </div>
-        <div id="admin-review" class="admin-sec active">
-            <div class="apply-tabs">
-                <div id="apply-tab-pending" class="active" onclick="switchApplyTab('pending')">待审核</div>
-                <div id="apply-tab-accepted" onclick="switchApplyTab('accepted')">已接单</div>
-                <div id="apply-tab-rejected" onclick="switchApplyTab('rejected')">已拒绝</div>
-            </div>
-            <div id="apply-list"></div>
-        </div>
-        <div id="admin-make" class="admin-sec">
-            <div class="card" style="background:#f8f5fa;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <b style="color:var(--primary);" id="make-month-title">排单</b>
-                    <button class="btn btn-sm btn-ghost" onclick="openMonthPicker()">📅 选年月</button>
-                </div>
-            </div>
-            <div class="month-tabs" id="make-month-tabs"></div>
-            <div id="drag-container"></div>
-        </div>
-        <div id="admin-orders" class="admin-sec">
-            <div class="card">
-                <div class="form-group" style="margin-bottom:10px;"><input id="order-search" placeholder="搜索编号 / 顾客名 / 手机号" oninput="renderOrderManageList()"></div>
-            </div>
-            <div id="order-manage-list"></div>
-        </div>
+        <div id="admin-review" class="admin-sec active"><div id="apply-list"></div></div>
+        <div id="admin-orders" class="admin-sec"><div id="order-manage-list"></div></div>
     </div>
 
-    <!-- 底部导航（动态渲染） -->
     <div class="bottom-nav" id="bottom-nav"></div>
 </div>
 
-<!-- 登录页（未登录时显示） -->
 <div id="login-page" class="page active" style="display:none;">
     <div class="page-title">定制工坊管家</div>
     <div class="card">
@@ -368,425 +196,215 @@ summary { font-size: 14px; color: var(--primary); font-weight: bold; cursor: poi
     <div class="modal-content" id="modal-body"></div>
 </div>
 
-<div id="month-picker" class="picker-overlay" onclick="if(event.target===this)closeMonthPicker()">
-    <div class="picker-sheet">
-        <div class="picker-header">
-            <span class="cancel" onclick="closeMonthPicker()">取消</span>
-            <h4>选择年月</h4>
-            <span class="confirm" onclick="confirmMonthPicker()">确定</span>
-        </div>
-        <div class="picker-wheel">
-            <div class="wheel-col" id="wheel-year"></div>
-            <div class="wheel-col" id="wheel-month"></div>
-        </div>
-    </div>
-</div>
-
-<div id="album-drawer" class="album-drawer" onclick="if(event.target===this)closeAlbum()">
-    <div class="album-header"><span id="album-title">相册</span><span style="cursor:pointer; font-size:20px;" onclick="closeAlbum()">✕</span></div>
-    <div class="album-body">
-        <div class="album-nav left" onclick="albumPrev()">‹</div>
-        <img id="album-img" src="">
-        <div class="album-nav right" onclick="albumNext()">›</div>
-    </div>
-    <div class="album-caption" id="album-caption"></div>
-</div>
-
 <div id="toast">提示信息</div>
 
-<!-- ⚠️ 修改为引入全局脚本，而不是 module，防止白屏 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ============================================================
-   已配置好你真实的 Supabase 项目信息，无需修改
-   ============================================================ */
 const SUPABASE_URL = 'https://lvbxdtpjondnttzxiqxl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_a9GY13wrjtGVroA6NPpvTA_Qv3bulQ_';
-
-// 使用全局 supabase 对象初始化
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ================= 全局状态 ================= */
-const state = {
-    user: null, isLogin: false, isAdmin: false,
-    currentMonth: null, currentChatNode: 0, currentOrderDetail: null,
-    album: { list: [], idx: 0 }, monthData: {}, applications: [], orders: [], works: [],
-    chat: {}, summary: {}, images: { sketch: [], style: [], detail: [] }
-};
-
-/* ================= 工具函数 ================= */
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.innerText = msg; t.style.display = 'block';
-    clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 2200);
-}
-function closeModal() { document.getElementById('custom-modal').classList.remove('show'); }
-function openModal(html) {
-    document.getElementById('modal-body').innerHTML = html;
-    document.getElementById('custom-modal').classList.add('show');
-}
-function copyText(t) {
-    navigator.clipboard?.writeText(t).then(() => showToast('已复制')).catch(() => showToast('已复制'));
-}
-function maskPhone(p) { return p ? p.slice(0,3) + '****' + p.slice(7) : ''; }
-function phoneToEmail(phone) { return phone + '@studio.local'; }
-function fmtDate(d) { if (!d) return ''; const dt = new Date(d); return `${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`; }
-function monthLabel(key) {
-    const [y, m] = key.split('-');
-    const now = new Date();
-    const isCurrent = parseInt(y) === now.getFullYear() && parseInt(m) === now.getMonth() + 1;
-    return `${y}年${parseInt(m)}月${isCurrent ? ' (本月)' : ''}`;
-}
+const state = { user: null, isLogin: false, isAdmin: false, currentMonth: null, currentOrderId: null, orders: [], works: [], applications: [], monthData: {} };
 const NODE_NAMES = ['拆件沟通','版型确认','布料选择','下单确认','面料预缩','打版裁片','缝制拼接','整烫定型','细节装饰','质检包装','寄出/交付'];
 
-/* ================= 认证 ================= */
+function showToast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.style.display = 'block'; clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 2000); }
+function closeModal() { document.getElementById('custom-modal').classList.remove('show'); }
+function openModal(html) { document.getElementById('modal-body').innerHTML = html; document.getElementById('custom-modal').classList.add('show'); }
+function maskPhone(p) { return p ? p.slice(0,3) + '****' + p.slice(7) : ''; }
+function phoneToEmail(p) { return p + '@studio.local'; }
+
+// 认证
 async function initAuth() {
     const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-        await loadProfile(session.user);
-    } else {
-        showLoginPage();
-    }
+    if (session) await loadProfile(session.user);
+    else showLoginPage();
     document.getElementById('loading').style.display = 'none';
 }
 async function loadProfile(user) {
-    const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
-    if (error || !data) { showToast('资料加载失败'); await sb.auth.signOut(); showLoginPage(); return; }
-    state.user = { id: data.id, phone: data.phone, nickname: data.nickname, is_admin: data.is_admin };
-    state.isLogin = true;
-    state.isAdmin = data.is_admin;
-    await enterApp();
+    const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+    if (!data) { await sb.auth.signOut(); showLoginPage(); return; }
+    state.user = data; state.isLogin = true; state.isAdmin = data.is_admin;
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    renderBottomNav();
+    await loadData();
+    switchTab('portfolio');
 }
-function showLoginPage() {
-    document.getElementById('login-page').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
-}
+function showLoginPage() { document.getElementById('login-page').style.display = 'block'; document.getElementById('app').style.display = 'none'; }
 async function doLogin() {
-    const phone = document.getElementById('login-phone').value.trim();
-    const pwd = document.getElementById('login-pwd').value;
-    if (!phone || pwd.length < 6) return showToast('请输入手机号和 ≥6 位密码');
-    const btn = document.getElementById('login-btn');
-    btn.disabled = true; btn.innerText = '登录中…';
-    const { data, error } = await sb.auth.signInWithPassword({ email: phoneToEmail(phone), password: pwd });
-    btn.disabled = false; btn.innerText = '登录';
-    if (error) return showToast('登录失败：手机号或密码错误');
+    const p = document.getElementById('login-phone').value.trim(); const pwd = document.getElementById('login-pwd').value;
+    if (!p || pwd.length < 6) return showToast('格式错误');
+    const { data, error } = await sb.auth.signInWithPassword({ email: phoneToEmail(p), password: pwd });
+    if (error) return showToast('账号或密码错误');
     await loadProfile(data.user);
 }
 function openRegisterModal() {
     openModal(`
-        <div class="modal-drag-bar"></div>
-        <div class="modal-header"><h3>注册新账号</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
+        <div class="modal-drag-bar"></div><div class="modal-header"><h3>注册新账号</h3><div class="modal-close" onclick="closeModal()">✕</div></div>
         <div class="form-group"><label>手机号</label><input id="reg-phone" placeholder="13800001234"></div>
-        <div class="form-group"><label>昵称</label><input id="reg-nick" placeholder="例如：李女士"></div>
+        <div class="form-group"><label>昵称</label><input id="reg-nick" placeholder="称呼"></div>
         <div class="form-group"><label>密码（≥6 位）</label><input type="password" id="reg-pwd"></div>
-        <div class="form-group"><label>确认密码</label><input type="password" id="reg-pwd2"></div>
         <button class="btn" onclick="submitRegister()">注册并登录</button>
     `);
 }
 async function submitRegister() {
-    const phone = document.getElementById('reg-phone').value.trim();
-    const nick = document.getElementById('reg-nick').value.trim();
-    const p1 = document.getElementById('reg-pwd').value;
-    const p2 = document.getElementById('reg-pwd2').value;
-    if (!phone || !nick || p1.length < 6) return showToast('请完整填写，密码 ≥6 位');
-    if (p1 !== p2) return showToast('两次密码不一致');
-    const { data, error } = await sb.auth.signUp({
-        email: phoneToEmail(phone), password: p1, options: { data: { phone, nickname: nick } }
-    });
-    if (error) return showToast('注册失败：' + error.message);
-    // 插入 profiles 表
-    await sb.from('profiles').insert([{ id: data.user.id, phone, nickname: nick }]);
-    closeModal(); showToast('注册成功');
-    await loadProfile(data.user);
+    const p = document.getElementById('reg-phone').value.trim(); const n = document.getElementById('reg-nick').value.trim(); const pwd = document.getElementById('reg-pwd').value;
+    if (!p || !n || pwd.length < 6) return showToast('请完整填写');
+    const { data, error } = await sb.auth.signUp({ email: phoneToEmail(p), password: pwd, options: { data: { phone: p, nickname: n } } });
+    if (error) return showToast('注册失败: ' + error.message);
+    await sb.from('profiles').insert([{ id: data.user.id, phone: p, nickname: n }]);
+    closeModal(); showToast('注册成功'); await loadProfile(data.user);
 }
 async function doLogout() { await sb.auth.signOut(); location.reload(); }
 
-/* ================= 应用入口 ================= */
-async function enterApp() {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    renderBottomNav();
-    await loadAllData();
-    renderAccount();
-    switchTab('portfolio');
+// 导航
+function renderBottomNav() {
+    const tabs = state.isAdmin ? [
+        { id: 'portfolio', label: '成品', icon: '<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>' },
+        { id: 'admin', label: '后台', icon: '<path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>' },
+        { id: 'account', label: '我的', icon: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>' }
+    ] : [
+        { id: 'portfolio', label: '成品', icon: '<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>' },
+        { id: 'queue', label: '排单', icon: '<path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>' },
+        { id: 'apply', label: '申请', icon: '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>' },
+        { id: 'my-orders', label: '订单', icon: '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>' },
+        { id: 'account', label: '我的', icon: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>' }
+    ];
+    document.getElementById('bottom-nav').innerHTML = tabs.map(t => `
+        <div class="nav-item" data-tab="${t.id}" onclick="switchTab('${t.id}')"><svg viewBox="0 0 24 24">${t.icon}</svg>${t.label}</div>
+    `).join('');
 }
-async function loadAllData() {
-    await Promise.all([loadMonths(), loadWorks(), loadOrders()]);
-    if (state.isAdmin) await loadApplications();
-    await buildChatFromOrders();
+function switchTab(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    const nav = document.querySelector(`.nav-item[data-tab="${id}"]`); if(nav) nav.classList.add('active');
+    if (id === 'portfolio') renderPortfolio();
+    if (id === 'queue') renderQueue();
+    if (id === 'my-orders') renderMyOrders();
+    if (id === 'account') renderAccount();
+    if (id === 'admin') renderAdmin();
+    window.scrollTo(0,0);
 }
-async function loadMonths() {
-    const { data: settings } = await sb.from('month_settings').select('*');
-    const months = {};
-    (settings || []).forEach(s => months[s.month] = { normalLimit: s.normal_limit, priorityLimit: s.priority_limit, normalUsed: 0, priorityUsed: 0 });
-    const now = new Date();
-    for (let i = 0; i < 3; i++) {
-        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-        const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-        if (!months[key]) months[key] = { normalLimit: 10, priorityLimit: 2, normalUsed: 0, priorityUsed: 0 };
-    }
-    const { data: orders } = await sb.from('orders').select('schedule_month,is_priority,status').in('status', ['排队中','制作中','已完成']);
-    (orders || []).forEach(o => {
-        if (months[o.schedule_month]) {
-            if (o.is_priority) months[o.schedule_month].priorityUsed++;
-            else months[o.schedule_month].normalUsed++;
-        }
-    });
-    Object.keys(months).forEach(k => months[k].label = monthLabel(k));
-    state.monthData = months;
-    const keys = Object.keys(months).sort();
-    state.currentMonth = keys.find(k => k === `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`) || keys[0];
-}
-async function loadWorks() {
-    const { data } = await sb.from('portfolios').select('*').order('created_at', { ascending: false });
-    state.works = (data || []).map(w => ({
-        id: w.id, title: w.title, category: w.category, desc: w.description,
-        cover: w.cover_image, images: w.detail_images || [], pinned: w.is_pinned, status: w.is_pinned ? '精选置顶' : '正常展示'
-    }));
-}
-async function loadOrders() {
+
+// 数据
+async function loadData() {
+    const { data: works } = await sb.from('portfolios').select('*').order('created_at', { ascending: false });
+    state.works = works || [];
     let q = sb.from('orders').select('*').order('created_at', { ascending: false });
     if (!state.isAdmin) q = q.eq('user_id', state.user.id);
-    const { data } = await q;
-    state.orders = (data || []).map(o => ({
-        id: o.id, no: o.order_no, name: o.client_name, project: o.project_name,
-        status: o.status, isPriority: o.is_priority, month: o.schedule_month,
-        phone: o.contact, remarkPattern: o.remark_pattern, remarkFabric: o.remark_fabric,
-        mine: o.user_id === state.user?.id, nodeIndex: 0, totalNodes: 11, skipped: []
-    }));
+    const { data: orders } = await q;
+    state.orders = orders || [];
+    
     if (state.orders.length) {
         const ids = state.orders.map(o => o.id);
         const { data: nodes } = await sb.from('order_nodes').select('*').in('order_id', ids).order('node_index');
-        const nodesByOrder = {};
-        (nodes || []).forEach(n => { (nodesByOrder[n.order_id] = nodesByOrder[n.order_id] || []).push(n); });
+        const nodeMap = {};
+        (nodes||[]).forEach(n => { (nodeMap[n.order_id] = nodeMap[n.order_id]||[]).push(n); });
         state.orders.forEach(o => {
-            const ns = nodesByOrder[o.id] || [];
-            o.totalNodes = ns.length || 11;
+            const ns = nodeMap[o.id] || [];
             o.nodeIndex = ns.filter(n => n.status === '已完成').length;
-            o.skipped = ns.filter(n => n.status === '已跳过').map(n => n.node_index);
             o.nodeNames = ns.map(n => n.node_name);
-            o.nodePhotos = {};
-            ns.forEach(n => { if (n.photos?.length) o.nodePhotos[n.node_index] = n.photos; });
+            if(!o.nodeNames.length) o.nodeNames = NODE_NAMES;
         });
     }
-}
-async function loadApplications() {
-    const { data } = await sb.from('applications').select('*').order('created_at', { ascending: false });
-    state.applications = (data || []).map(a => ({
-        id: a.id, name: a.applicant_name, phone: a.contact, desc: a.description,
-        budget: a.budget_range, priority: a.want_priority, status: a.status,
-        reason: a.reject_reason, images: a.images || [], createdAt: fmtDate(a.created_at), raw: a
-    }));
-}
-async function buildChatFromOrders() {
-    if (!state.orders.length) return;
-    const ids = state.orders.map(o => o.id);
-    const { data } = await sb.from('messages').select('*').in('order_id', ids).order('created_at');
-    state.chat = {};
-    (data || []).forEach(m => {
-        if (!state.chat[m.order_id]) state.chat[m.order_id] = {};
-        if (!state.chat[m.order_id][m.node_index]) state.chat[m.order_id][m.node_index] = [];
-        state.chat[m.order_id][m.node_index].push({ role: m.sender_role, text: m.content || '' });
-    });
+    
+    if (state.isAdmin) {
+        const { data: apps } = await sb.from('applications').select('*').order('created_at', { ascending: false });
+        state.applications = apps || [];
+    }
 }
 
-/* ================= 底部导航 ================= */
-function renderBottomNav() {
-    const tabs = state.isAdmin
-        ? [
-            { id: 'portfolio', icon: '<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>', label: '成品' },
-            { id: 'admin', icon: '<path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>', label: '后台' },
-            { id: 'account', icon: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>', label: '我的' }
-        ]
-        : [
-            { id: 'portfolio', icon: '<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>', label: '成品' },
-            { id: 'queue', icon: '<path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>', label: '排单' },
-            { id: 'apply', icon: '<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>', label: '申请' },
-            { id: 'my-orders', icon: '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>', label: '订单' },
-            { id: 'account', icon: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>', label: '我的' }
-        ];
-    document.getElementById('bottom-nav').innerHTML = tabs.map(t => `
-        <div class="nav-item" data-tab="${t.id}" onclick="switchTab('${t.id}')">
-            <svg viewBox="0 0 24 24">${t.icon}</svg>${t.label}
-        </div>
-    `).join('');
-}
-function switchTab(tabId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    const page = document.getElementById('page-' + tabId);
-    if (!page) return;
-    page.classList.add('active');
-    const nav = document.querySelector(`.nav-item[data-tab="${tabId}"]`);
-    if (nav) nav.classList.add('active');
-    if (tabId === 'portfolio') renderPortfolio();
-    if (tabId === 'queue') renderQueue();
-    if (tabId === 'apply') checkApplyLogin();
-    if (tabId === 'my-orders') renderMyOrders();
-    if (tabId === 'account') renderAccount();
-    if (tabId === 'admin') renderAdmin();
-    window.scrollTo(0, 0);
-}
-
-/* ================= 账户 ================= */
-function renderAccount() {
-    const el = document.getElementById('account-content');
-    el.innerHTML = `
-        <div class="card">
-            <h3 style="color:var(--primary);">${state.user.nickname}</h3>
-            <p style="font-size:12px; color:var(--text-light); margin-top:5px;">${maskPhone(state.user.phone)} ${state.isAdmin?'· 店长':''}</p>
-        </div>
-        <div class="card">
-            <button class="btn btn-danger" onclick="doLogout()">退出登录</button>
-        </div>
-    `;
-}
-
-/* ================= 成品 ================= */
+// 渲染
 function renderPortfolio() {
     document.getElementById('portfolio-filters').innerHTML = '<div class="filter-pill active">全部</div>';
     document.getElementById('portfolio-container').innerHTML = state.works.map(w => `
-        <div class="pf-item">
-            ${w.pinned ? '<div class="pf-pin">精选</div>' : ''}
-            <img src="${w.cover || 'https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?auto=format&fit=crop&q=80&w=400'}">
-            <div class="pf-info"><div class="pf-name">${w.title}</div></div>
-        </div>
+        <div class="pf-item"><img src="${w.cover_image || 'https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?auto=format&fit=crop&q=80&w=400'}"><div class="pf-info"><div class="pf-name">${w.title}</div></div></div>
     `).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px; grid-column:span 2;">暂无作品</p>';
 }
-
-/* ================= 排单 ================= */
 function renderQueue() {
-    const months = Object.keys(state.monthData).sort();
-    document.getElementById('month-tabs').innerHTML = months.map(m =>
-        `<div class="month-pill ${m === state.currentMonth ? 'active' : ''}" onclick="state.currentMonth='${m}'; renderQueue();">${state.monthData[m].label}</div>`
-    ).join('');
-    const md = state.monthData[state.currentMonth];
-    if (md) {
-        document.getElementById('month-head').innerHTML = `
-            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                <b style="color:var(--primary); font-size:15px;">${md.label} 排单</b>
-            </div>
-        `;
-    }
-    const list = state.orders.filter(o => o.month === state.currentMonth && o.status !== '已取消');
+    const curM = new Date().toISOString().slice(0,7);
+    document.getElementById('month-tabs').innerHTML = `<div class="month-pill active">${curM.replace('-','年')}月</div>`;
+    document.getElementById('month-head').innerHTML = `<b style="color:var(--primary);">本月排单进度</b>`;
+    const list = state.orders.filter(o => o.schedule_month === curM);
     document.getElementById('queue-container').innerHTML = list.map(o => `
-        <div class="order-card ${o.mine ? 'mine' : (o.status==='制作中'?'bg-purple':'')}" onclick="alert('功能测试中')">
-            ${o.mine ? '<div class="mine-badge">⭐ 我的</div>' : ''}
-            <div class="oc-head"><span>${o.no} ${o.isPriority ? '<span class="oc-priority">⚡加急</span>' : ''}</span><span class="oc-badge">${o.status}</span></div>
-            <div class="oc-title">${o.mine?o.name:o.name.charAt(0)+'**'} · ${o.project}</div>
+        <div class="order-card ${o.user_id===state.user.id?'mine':(o.status==='制作中'?'bg-purple':'')}">
+            <div class="oc-head"><span>${o.order_no}</span><span class="oc-badge">${o.status}</span></div>
+            <div class="oc-title">${o.client_name.charAt(0)}** · ${o.project_name}</div>
         </div>
-    `).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px;">本月暂无订单</p>';
+    `).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px;">暂无订单</p>';
 }
-function checkApplyLogin() {
-    const n = document.getElementById('apply-name');
-    const c = document.getElementById('apply-contact');
-    if (n && !n.value) n.value = state.user.nickname;
-    if (c && !c.value) c.value = state.user.phone;
-}
-function addImages(kind, input) {
-    const files = Array.from(input.files || []);
-    files.forEach(f => state.images[kind].push({ file: f, url: URL.createObjectURL(f) }));
-    input.value = '';
-    renderImageRow(kind);
-}
-function renderImageRow(kind) {
-    const row = document.getElementById('row-' + kind);
-    row.innerHTML = state.images[kind].map((img, i) =>
-        `<div class="img-thumb"><img src="${img.url}"><div class="del" onclick="state.images['${kind}'].splice(${i},1); renderImageRow('${kind}')">✕</div></div>`
-    ).join('');
-}
-async function submitApply(e) {
-    e.preventDefault();
-    const btn = document.getElementById('apply-submit-btn');
-    btn.disabled = true; btn.innerText = '提交中…';
-    await sb.from('applications').insert({
-        user_id: state.user.id,
-        applicant_name: document.getElementById('apply-name').value,
-        contact: document.getElementById('apply-contact').value,
-        description: document.getElementById('apply-desc').value,
-        budget_range: document.getElementById('apply-budget').value,
-        want_priority: document.getElementById('apply-priority').checked,
-        status: '待审核'
-    });
-    btn.disabled = false; btn.innerText = '提交申请';
-    document.getElementById('apply-form-area').style.display = 'none';
-    document.getElementById('apply-success-area').style.display = 'block';
-    await loadApplications();
-}
-
-/* ================= 我的订单 ================= */
 function renderMyOrders() {
     document.getElementById('my-order-list').style.display = 'block';
     document.getElementById('order-detail-view').style.display = 'none';
-    document.getElementById('my-apply-list').style.display = 'none';
-    
-    const myOrders = state.orders.filter(o => o.mine);
-    document.getElementById('my-order-list').innerHTML = myOrders.map(o => `
-        <div class="card card-click" onclick="openCustomerOrderDetail('${o.id}')">
-            <div style="display:flex; justify-content:space-between;">
-                <b>${o.project}</b>
-                <span style="color:var(--primary); font-weight:bold;">${o.status}</span>
-            </div>
-            <div style="font-size:12px; color:var(--text-light); margin-top:6px;">
-                ${o.no} · 当前节点：${o.nodeNames?.[o.nodeIndex] || '待更新'}
-            </div>
+    document.getElementById('my-order-list').innerHTML = state.orders.map(o => `
+        <div class="card card-click" onclick="openOrderDetail('${o.id}')">
+            <div style="display:flex; justify-content:space-between;"><b>${o.project_name}</b><span style="color:var(--primary);">${o.status}</span></div>
+            <div style="font-size:12px; color:#888; margin-top:6px;">${o.order_no} · ${o.nodeNames[o.nodeIndex]||'完成'}</div>
         </div>
-    `).join('') || '<p style="text-align:center; color:var(--text-light); padding:20px;">暂无订单，去申请一件吧</p>';
+    `).join('') || '<p style="text-align:center; color:#aaa; padding:20px;">暂无订单</p>';
 }
-function openCustomerOrderDetail(id) {
+function renderAccount() {
+    document.getElementById('account-content').innerHTML = `
+        <div class="card"><h3 style="color:var(--primary);">${state.user.nickname}</h3><p style="font-size:12px; color:#888;">${maskPhone(state.user.phone)} ${state.isAdmin?'· 店长':''}</p></div>
+        <div class="card"><button class="btn btn-danger" onclick="doLogout()">退出登录</button></div>
+    `;
+}
+
+// 详情与聊天
+async function openOrderDetail(id) {
     const o = state.orders.find(x => x.id === id);
-    if (!o) return;
     document.getElementById('my-order-list').style.display = 'none';
     const view = document.getElementById('order-detail-view');
     view.style.display = 'block';
-    const names = o.nodeNames || NODE_NAMES;
-    const tlHtml = names.map((name, i) => {
-        let cls = i < o.nodeIndex ? 'done' : (i === o.nodeIndex ? 'current' : '');
-        return `<div class="tl-item ${cls}"><div class="tl-name">${i+1}. ${name}</div></div>`;
-    }).join('');
+    
+    const { data: msgs } = await sb.from('messages').select('*').eq('order_id', id).order('created_at');
+    const chatHtml = (msgs||[]).map(m => `
+        <div class="chat-msg ${m.sender_role}"><div class="bubble ${m.sender_role}">${m.content}</div></div>
+    `).join('');
+    
+    const tlHtml = o.nodeNames.map((name, i) => `
+        <div class="tl-item ${i<o.nodeIndex?'done':(i===o.nodeIndex?'current':'')}"><div class="tl-name">${i+1}. ${name}</div></div>
+    `).join('');
+
     view.innerHTML = `
         <button class="btn btn-ghost" style="margin-bottom:12px;" onclick="renderMyOrders()">← 返回</button>
+        <div class="card"><h3 style="color:var(--primary);">${o.project_name}</h3><p style="font-size:12px; color:#888;">${o.order_no} · ${o.status}</p></div>
+        <div class="card"><h4 style="color:var(--primary); margin-bottom:8px;">🧵 流程</h4><div class="timeline">${tlHtml}</div></div>
         <div class="card">
-            <h3 style="color:var(--primary);">${o.project}</h3>
-            <p style="font-size:12px; color:var(--text-light); margin-top:6px;">${o.no} · ${o.status}</p>
-        </div>
-        <div class="card">
-            <h4 style="color:var(--primary);margin-bottom:8px;">🧵 定制流程</h4>
-            <div class="timeline">${tlHtml}</div>
-        </div>
-        <div class="card">
-            <h4 style="color:var(--primary); margin-bottom:8px;">💬 沟通留言</h4>
-            <div class="chat-box" style="height:100px; justify-content:center; align-items:center; color:#aaa; font-size:12px;">留言功能请升级版查看</div>
+            <h4 style="color:var(--primary); margin-bottom:8px;">💬 留言</h4>
+            <div class="chat-box" id="chat-box">${chatHtml || '<div style="text-align:center; color:#aaa; font-size:12px;">暂无消息</div>'}</div>
+            <div class="chat-input">
+                <input id="msg-input" placeholder="输入留言...">
+                <button class="btn btn-sm" style="margin:0;" onclick="sendMsg('${o.id}')">发送</button>
+            </div>
         </div>
     `;
+    const cb = document.getElementById('chat-box'); if(cb) cb.scrollTop = cb.scrollHeight;
+}
+async function sendMsg(orderId) {
+    const input = document.getElementById('msg-input');
+    if(!input.value.trim()) return;
+    const role = state.isAdmin ? 'admin' : 'customer';
+    await sb.from('messages').insert({ order_id: orderId, sender_role: role, content: input.value });
+    input.value = '';
+    openOrderDetail(orderId);
 }
 
-/* ================= 店长后台 ================= */
-async function renderAdmin() {
-    document.getElementById('dash-grid').innerHTML = `
-        <div class="dash-card"><div class="dash-num">${state.applications.filter(a=>a.status==='待审核').length}</div><div class="dash-label">待审核</div></div>
-        <div class="dash-card"><div class="dash-num">${state.orders.length}</div><div class="dash-label">全部订单</div></div>
-        <div class="dash-card"><div class="dash-num">${state.orders.filter(o=>o.status==='制作中').length}</div><div class="dash-label">制作中</div></div>
-    `;
+// 店长
+function renderAdmin() {
     document.getElementById('apply-list').innerHTML = state.applications.filter(a=>a.status==='待审核').map(a => `
         <div class="card">
-            <b>${a.name} (${a.phone})</b>
-            <p style="font-size:13px; color:#555; margin:10px 0;">${a.desc}</p>
-            <button class="btn btn-sm" onclick="acceptApply('${a.id}', '${a.name}', '${a.phone}', '${a.raw.user_id}')">接单</button>
+            <b>${a.applicant_name} (${a.contact})</b>
+            <p style="font-size:13px; color:#555; margin:10px 0;">${a.description}</p>
+            <button class="btn btn-sm" onclick="acceptApply('${a.id}', '${a.applicant_name}', '${a.contact}', '${a.user_id}')">接单</button>
         </div>
     `).join('') || '<p style="text-align:center; color:#aaa;">暂无</p>';
     
-    document.getElementById('drag-container').innerHTML = state.orders.map(o => `
-        <div class="order-item" onclick="alert('详情功能请升级版查看')">
-            <b>${o.no} ${o.name} ${o.isPriority ? '⚡' : ''}</b>
-            <div>${o.project}</div>
-        </div>
-    `).join('') || '<p style="text-align:center; color:#aaa;">暂无排单</p>';
-
     document.getElementById('order-manage-list').innerHTML = state.orders.map(o => `
-        <div class="card">
-            <b>${o.no} ${o.name}</b>
-            <div style="font-size:12px; color:#888; margin-top:4px;">${o.project} · ${o.status}</div>
+        <div class="card" onclick="openOrderDetail('${o.id}')">
+            <b>${o.order_no} ${o.client_name}</b>
+            <div style="font-size:12px; color:#888; margin-top:4px;">${o.project_name} · ${o.status}</div>
         </div>
     `).join('') || '<p style="text-align:center; color:#aaa;">暂无订单</p>';
 }
@@ -800,15 +418,13 @@ async function acceptApply(appId, name, contact, userId) {
     const orderNo = '#' + Math.floor(1000 + Math.random() * 9000);
     const { data: newOrder } = await sb.from('orders').insert([{ 
         order_no: orderNo, client_name: name, contact: contact, project_name: '新定制款', 
-        status: '排队中', schedule_month: state.currentMonth, user_id: userId
+        status: '排队中', schedule_month: new Date().toISOString().slice(0,7), user_id: userId
     }]).select().single();
-    
     await sb.from('order_nodes').insert(NODE_NAMES.map((n, i) => ({ order_id: newOrder.id, node_index: i, node_name: n, status: '待开始' })));
     await sb.from('applications').update({ status: '已接单' }).eq('id', appId);
-    showToast('接单成功'); await loadAllData(); renderAdmin();
+    showToast('接单成功'); await loadData(); renderAdmin();
 }
 
-/* ================= 初始化 ================= */
 initAuth();
 </script>
 </body>
